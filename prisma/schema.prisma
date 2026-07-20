@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Admin {
+  alertDaysRed     Int     @default(7)
+  alertDaysYellow  Int     @default(15)
+  id               String  @id @default(uuid())
+  email            String  @unique
+  password         String
+  name             String
+  whatsappTemplate String?
+  dianCalendarRules String?
+}
+
+model Client {
+  id              String      @id @default(uuid())
+  documentNumber  String      @unique
+  name            String
+  phone           String?
+  dueDate         DateTime
+  status          String      @default("Pendiente") // Pendiente, En Proceso, Completado
+  dianPassword    String?
+  magicLinkToken  String?     @unique
+  magicLinkExp    DateTime?
+  documents       Document[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  clientId   String
+  client     Client   @relation(fields: [clientId], references: [id])
+  type       String
+  filePath   String
+  fileName   String
+  uploadedAt DateTime @default(now())
+}
