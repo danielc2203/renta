@@ -230,26 +230,32 @@ export default function AdminDashboard() {
     try {
       if (dianCalendarRules) {
         const parsed = JSON.parse(dianCalendarRules)
-        if (parsed.august && parsed.august.days && parsed.august.days.length > 20) {
-          // It's the old 31-day format, extract only the days we care about
-          const extractDays = (month: string) => {
-            return initialData[month].days.map((d: any) => {
-               const oldDayObj = parsed[month].days[d.day - 1]
-               if (!oldDayObj) return d
-               // Only take d1 and d2 if they were explicitly typed (not empty)
-               // But wait, if they cleared it, they might want it empty.
-               // Let's just take it if oldDayObj exists and has d1 or d2.
-               return { ...d, d1: oldDayObj.d1 || d.d1, d2: oldDayObj.d2 || d.d2 }
-            })
+        if (parsed.august && parsed.august.days && Array.isArray(parsed.august.days)) {
+          if (typeof parsed.august.days[0] === 'string' || typeof parsed.august.days[0] === 'number') {
+            // The DB contains an array of primitives, which is an invalid old format.
+            // Just use the buildDefaultConfig() (which is already in initialData) to restore the default numbers.
+            initialData.august.year = parsed.august.year || '2026'
+            initialData.september.year = parsed.september.year || '2026'
+            initialData.october.year = parsed.october.year || '2026'
+          } else if (parsed.august.days.length > 20) {
+            // It's the old 31-day object format, extract only the days we care about
+            const extractDays = (month: string) => {
+              return initialData[month].days.map((d: any) => {
+                 const oldDayObj = parsed[month].days[d.day - 1]
+                 if (!oldDayObj) return d
+                 return { ...d, d1: oldDayObj.d1 || d.d1, d2: oldDayObj.d2 || d.d2 }
+              })
+            }
+            initialData.august.days = extractDays('august')
+            initialData.september.days = extractDays('september')
+            initialData.october.days = extractDays('october')
+            initialData.august.year = parsed.august.year || '2026'
+            initialData.september.year = parsed.september.year || '2026'
+            initialData.october.year = parsed.october.year || '2026'
+          } else {
+            // It's already the correct object format
+            initialData = parsed
           }
-          initialData.august.days = extractDays('august')
-          initialData.september.days = extractDays('september')
-          initialData.october.days = extractDays('october')
-          initialData.august.year = parsed.august.year || '2026'
-          initialData.september.year = parsed.september.year || '2026'
-          initialData.october.year = parsed.october.year || '2026'
-        } else {
-          initialData = parsed
         }
       }
     } catch(e) {}
