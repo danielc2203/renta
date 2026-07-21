@@ -46,9 +46,8 @@ export async function GET(
 
     return new NextResponse(fileBuffer, {
       headers: {
-        'Content-Disposition': `attachment; filename="${document.fileName}"`,
-        'X-Content-Type-Options': 'nosniff',
-        'Content-Type': 'application/octet-stream',
+        'Content-Disposition': `inline; filename="${document.fileName}"`,
+        'Content-Type': 'application/pdf',
       },
     })
   } catch (error) {
