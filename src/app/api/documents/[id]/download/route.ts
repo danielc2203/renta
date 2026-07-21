@@ -5,7 +5,9 @@ import { cookies } from 'next/headers'
 import path from 'path'
 import fs from 'fs'
 
-const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads')
+const UPLOAD_DIR = process.env.NODE_ENV === 'production' 
+  ? '/app/data/uploads' 
+  : path.resolve(process.cwd(), 'uploads')
 
 export async function GET(
   request: Request,

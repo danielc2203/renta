@@ -6,7 +6,9 @@ import { v4 as uuidv4 } from 'uuid'
 import fs from 'fs'
 import path from 'path'
 
-const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads')
+const UPLOAD_DIR = process.env.NODE_ENV === 'production' 
+  ? '/app/data/uploads' 
+  : path.resolve(process.cwd(), 'uploads')
 const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
 const ALLOWED_EXTENSIONS = ['.pdf']
 const ALLOWED_MIME_TYPES = ['application/pdf']
