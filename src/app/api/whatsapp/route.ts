@@ -68,7 +68,13 @@ export async function POST(request: Request) {
 
     const dueDateStr = new Date(client.dueDate).toLocaleDateString('es-CO', { timeZone: 'UTC' })
     
-    let message = admin?.whatsappTemplate || `Hola {{nombre}}, te recordamos que tu fecha límite para la declaración de renta es el {{vencimiento}}. Por favor, sube tus documentos a nuestro portal seguro usando este enlace único que vence en {{dias}} días: {{enlace}}`
+    // Si la plantilla antigua está guardada en la base de datos, reemplazar "3 días" por la variable dinámica
+    let savedTemplate = admin?.whatsappTemplate || ''
+    if (savedTemplate.includes('3 días')) {
+      savedTemplate = savedTemplate.replace('3 días', '{{dias}} días')
+    }
+
+    let message = savedTemplate || `Hola {{nombre}}, te recordamos que tu fecha límite para la declaración de renta es el {{vencimiento}}. Por favor, sube tus documentos a nuestro portal seguro usando este enlace único que vence en {{dias}} días: {{enlace}}`
     
     message = message
       .replace(/\{\{nombre\}\}/g, client.name)
