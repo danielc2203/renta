@@ -77,6 +77,14 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(arrayBuffer)
     fs.writeFileSync(filePath, buffer)
 
+    // Delete any existing documents of the same type for this client to prevent duplicates
+    await prisma.document.deleteMany({
+      where: {
+        clientId,
+        type: documentType
+      }
+    })
+
     // Save to database
     const document = await prisma.document.create({
       data: {
