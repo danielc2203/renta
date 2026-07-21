@@ -429,11 +429,14 @@ export default function AdminDashboard() {
     {
       name: 'Acciones',
       button: true,
-      width: '240px',
+      width: '320px',
       cell: (row: any) => (
         <div style={{ display: 'flex', gap: '8px' }}>
           <button className="btn" onClick={() => sendWhatsApp(row.id)} style={{ padding: '6px 10px', fontSize: '12px', background: '#25D366', color: '#fff', border: 'none', fontWeight: 'bold' }}>
             WApp
+          </button>
+          <button className="btn" onClick={() => router.push(`/admin/cliente/${row.id}`)} style={{ padding: '6px 10px', fontSize: '12px', background: 'var(--primary-color)', color: '#fff', border: 'none' }}>
+            Ver Portal
           </button>
           <button className="btn" onClick={() => openModal(row)} style={{ padding: '6px 10px', fontSize: '12px', background: 'var(--surface-color)', border: '1px solid var(--border-color)' }}>
             Editar

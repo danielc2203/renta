@@ -19,16 +19,25 @@ export async function POST(request: Request) {
     }
 
     const payload = verifyToken(token) as any
-    if (!payload || payload.role !== 'client') {
+    if (!payload) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const clientId = payload.id
-    
     // Parse form data
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const documentType = formData.get('type') as string | null
+    const providedClientId = formData.get('clientId') as string | null
+
+    let clientId = payload.id
+    if (payload.role === 'admin') {
+      if (!providedClientId) {
+        return NextResponse.json({ error: 'Falta clientId' }, { status: 400 })
+      }
+      clientId = providedClientId
+    } else if (payload.role !== 'client') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
 
     if (!file || !documentType) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 })
