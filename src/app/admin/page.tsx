@@ -78,24 +78,24 @@ export default function AdminDashboard() {
   
   const buildDefaultConfig = () => {
     const config: any = {
-      august: { year: '2026', month: '08', days: Array.from({length: 31}, (_, i) => ({ day: i + 1, d1: '', d2: '' })) },
-      september: { year: '2026', month: '09', days: Array.from({length: 30}, (_, i) => ({ day: i + 1, d1: '', d2: '' })) },
-      october: { year: '2026', month: '10', days: Array.from({length: 31}, (_, i) => ({ day: i + 1, d1: '', d2: '' })) }
+      august: { year: '2026', month: '08', days: [] },
+      september: { year: '2026', month: '09', days: [] },
+      october: { year: '2026', month: '10', days: [] }
     };
+    
     let digit = 1;
     [12, 13, 14, 18, 19, 20, 21, 24, 25, 26, 27, 28, 31].forEach(d => {
-      config.august.days[d-1].d1 = digit.toString().padStart(2, '0');
-      config.august.days[d-1].d2 = (digit+1).toString().padStart(2, '0');
+      config.august.days.push({ day: d, d1: digit.toString().padStart(2, '0'), d2: (digit+1).toString().padStart(2, '0') });
       digit += 2;
     });
+    
     [1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25, 28].forEach(d => {
-      config.september.days[d-1].d1 = digit.toString().padStart(2, '0');
-      config.september.days[d-1].d2 = (digit+1).toString().padStart(2, '0');
+      config.september.days.push({ day: d, d1: digit.toString().padStart(2, '0'), d2: (digit+1).toString().padStart(2, '0') });
       digit += 2;
     });
+    
     [1, 2, 5, 6, 7, 8, 9, 13, 14, 15, 16, 19, 20, 21, 22, 23, 26].forEach(d => {
-      config.october.days[d-1].d1 = digit.toString().padStart(2, '0');
-      config.october.days[d-1].d2 = (digit+1 === 100 ? '00' : (digit+1).toString().padStart(2, '0'));
+      config.october.days.push({ day: d, d1: digit.toString().padStart(2, '0'), d2: (digit+1 === 100 ? '00' : (digit+1).toString().padStart(2, '0')) });
       digit += 2;
     });
     return config;
@@ -228,7 +228,30 @@ export default function AdminDashboard() {
   const openCalendarModal = () => {
     let initialData = buildDefaultConfig()
     try {
-      if (dianCalendarRules) initialData = JSON.parse(dianCalendarRules)
+      if (dianCalendarRules) {
+        const parsed = JSON.parse(dianCalendarRules)
+        if (parsed.august && parsed.august.days && parsed.august.days.length > 20) {
+          // It's the old 31-day format, extract only the days we care about
+          const extractDays = (month: string) => {
+            return initialData[month].days.map((d: any) => {
+               const oldDayObj = parsed[month].days[d.day - 1]
+               if (!oldDayObj) return d
+               // Only take d1 and d2 if they were explicitly typed (not empty)
+               // But wait, if they cleared it, they might want it empty.
+               // Let's just take it if oldDayObj exists and has d1 or d2.
+               return { ...d, d1: oldDayObj.d1 || d.d1, d2: oldDayObj.d2 || d.d2 }
+            })
+          }
+          initialData.august.days = extractDays('august')
+          initialData.september.days = extractDays('september')
+          initialData.october.days = extractDays('october')
+          initialData.august.year = parsed.august.year || '2026'
+          initialData.september.year = parsed.september.year || '2026'
+          initialData.october.year = parsed.october.year || '2026'
+        } else {
+          initialData = parsed
+        }
+      }
     } catch(e) {}
     
     setCalendarData(initialData)
@@ -254,8 +277,8 @@ export default function AdminDashboard() {
             <tr>
               <td style={{ background: '#87CEEB', padding: '8px', fontWeight: 'bold', border: '1px solid black', width: '100px' }}>Día</td>
               {data.days.map((dayObj: any, idx: number) => (
-                <td key={idx} style={{ background: '#87CEEB', padding: '4px', border: '1px solid black', textAlign: 'center', width: '30px' }}>
-                  {dayObj.day}
+                <td key={idx} style={{ background: '#87CEEB', padding: '4px', border: '1px solid black', textAlign: 'center', width: '30px', color: 'black' }}>
+                  {dayObj.day || (idx + 1)}
                 </td>
               ))}
             </tr>
@@ -271,7 +294,7 @@ export default function AdminDashboard() {
                       newDays[idx] = { ...newDays[idx], d1: e.target.value }
                       setCalendarData({...calendarData, [monthKey]: {...data, days: newDays}})
                     }}
-                    style={{ width: '100%', textAlign: 'center', border: 'none', background: 'transparent', padding: 0 }}
+                    style={{ width: '100%', textAlign: 'center', border: 'none', background: 'transparent', padding: 0, color: 'black' }}
                   />
                 </td>
               ))}
@@ -287,7 +310,7 @@ export default function AdminDashboard() {
                       newDays[idx] = { ...newDays[idx], d2: e.target.value }
                       setCalendarData({...calendarData, [monthKey]: {...data, days: newDays}})
                     }}
-                    style={{ width: '100%', textAlign: 'center', border: 'none', background: 'transparent', padding: 0 }}
+                    style={{ width: '100%', textAlign: 'center', border: 'none', background: 'transparent', padding: 0, color: 'black' }}
                   />
                 </td>
               ))}
