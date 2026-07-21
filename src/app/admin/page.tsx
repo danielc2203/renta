@@ -497,16 +497,16 @@ export default function AdminDashboard() {
       width: '180px',
       cell: (row: any) => (
         <div style={{ display: 'flex', gap: '6px' }}>
-          <button title="Enviar WhatsApp" className="btn" onClick={() => sendWhatsApp(row.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '4px' }}>
+          <button title="Enviar WhatsApp" className="btn" onClick={() => sendWhatsApp(row.id)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '4px' }}>
             <MessageCircle size={18} />
           </button>
-          <button title="Ver Portal" className="btn" onClick={() => router.push(`/admin/cliente/${row.id}`)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'var(--primary-color)', color: '#fff', border: 'none', borderRadius: '4px' }}>
+          <button title="Ver Portal" className="btn" onClick={() => router.push(`/admin/cliente/${row.id}`)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'var(--primary-color)', color: '#fff', border: 'none', borderRadius: '4px' }}>
             <Eye size={18} />
           </button>
-          <button title="Editar" className="btn" onClick={() => openModal(row)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '4px' }}>
+          <button title="Editar" className="btn" onClick={() => openModal(row)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '4px' }}>
             <Pencil size={18} />
           </button>
-          <button title="Eliminar" className="btn" onClick={() => handleDelete(row.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'rgba(239,68,68,0.2)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: '4px' }}>
+          <button title="Eliminar" className="btn" onClick={() => handleDelete(row.id)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'rgba(239,68,68,0.2)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: '4px' }}>
             <Trash2 size={18} />
           </button>
         </div>
