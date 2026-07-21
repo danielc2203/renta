@@ -66,6 +66,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Ruta de archivo inválida' }, { status: 400 })
     }
 
+    if (!fs.existsSync(UPLOAD_DIR)) {
+      fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+    }
+
     // Write file
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
