@@ -65,14 +65,15 @@ export default function AdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<any>(null)
   const [filterText, setFilterText] = useState('')
-  const [trafficFilter, setTrafficFilter] = useState<string | null>(null)
+  const [trafficFilter, setTrafficFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [paymentFilter, setPaymentFilter] = useState('')
   
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [whatsappTemplate, setWhatsappTemplate] = useState('')
   const [alertDaysRed, setAlertDaysRed] = useState(7)
   const [alertDaysYellow, setAlertDaysYellow] = useState(15)
   const [dianCalendarRules, setDianCalendarRules] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
   
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false)
   
@@ -109,7 +110,9 @@ export default function AdminDashboard() {
     dianPassword: '',
     phone: '',
     dueDate: '',
-    status: 'Pendiente'
+    status: 'Pendiente',
+    fee: '',
+    paymentStatus: 'Debe'
   })
 
   const router = useRouter()
@@ -354,7 +357,9 @@ export default function AdminDashboard() {
         dianPassword: client.dianPassword || '',
         phone: client.phone || '',
         dueDate: new Date(client.dueDate).toISOString().split('T')[0],
-        status: client.status
+        status: client.status,
+        fee: client.fee || '',
+        paymentStatus: client.paymentStatus || 'Debe'
       })
     } else {
       setEditingClient(null)
@@ -364,7 +369,9 @@ export default function AdminDashboard() {
         dianPassword: '',
         phone: '',
         dueDate: '',
-        status: 'Pendiente'
+        status: 'Pendiente',
+        fee: '',
+        paymentStatus: 'Debe'
       })
     }
     setIsModalOpen(true)
@@ -460,6 +467,28 @@ export default function AdminDashboard() {
       )
     },
     {
+      name: 'Tarifa',
+      selector: (row: any) => row.fee,
+      sortable: true,
+      format: (row: any) => row.fee ? `$ ${row.fee.toLocaleString('es-CO')}` : '-'
+    },
+    {
+      name: 'Pago',
+      selector: (row: any) => row.paymentStatus,
+      sortable: true,
+      cell: (row: any) => (
+        <span style={{ 
+          padding: '4px 8px', 
+          borderRadius: '4px', 
+          fontSize: '12px',
+          background: row.paymentStatus === 'Pagado' ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)',
+          color: row.paymentStatus === 'Pagado' ? 'var(--success)' : '#F59E0B'
+        }}>
+          {row.paymentStatus || 'Debe'}
+        </span>
+      )
+    },
+    {
       name: 'Acciones',
       button: true,
       width: '320px',
@@ -485,11 +514,11 @@ export default function AdminDashboard() {
   const filteredItems = clients.filter(item => {
     const matchesText = item.name.toLowerCase().includes(filterText.toLowerCase()) || 
                         item.documentNumber.toLowerCase().includes(filterText.toLowerCase());
-    const traffic = getTrafficLight(item)
-    const matchesTraffic = trafficFilter ? traffic.code === trafficFilter : true;
+    const matchesTraffic = trafficFilter ? getTrafficLight(item).code === trafficFilter : true;
     const matchesStatus = statusFilter ? item.status === statusFilter : true;
+    const matchesPayment = paymentFilter ? (item.paymentStatus || 'Debe') === paymentFilter : true;
     
-    return matchesText && matchesTraffic && matchesStatus;
+    return matchesText && matchesTraffic && matchesStatus && matchesPayment;
   })
 
   const urgentCount = clients.filter(c => getTrafficLight(c).code === 'ROJO').length
@@ -530,16 +559,25 @@ export default function AdminDashboard() {
           <option value="En Proceso">En Proceso</option>
           <option value="Completado">Completado</option>
         </select>
+        <select 
+          value={paymentFilter} 
+          onChange={e => setPaymentFilter(e.target.value)}
+          style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }}
+        >
+          <option value="">Todos los Pagos</option>
+          <option value="Debe">Debe</option>
+          <option value="Pagado">Pagado</option>
+        </select>
         <div style={{ display: 'flex', gap: '8px' }}>
-          {(trafficFilter || statusFilter || filterText) && (
-            <button className="btn" onClick={() => { setTrafficFilter(null); setStatusFilter(''); setFilterText(''); }} style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--surface-color)' }}>
+          {(trafficFilter || statusFilter || paymentFilter || filterText) && (
+            <button className="btn" onClick={() => { setTrafficFilter(''); setStatusFilter(''); setPaymentFilter(''); setFilterText(''); }} style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--surface-color)' }}>
               Limpiar Filtros
             </button>
           )}
         </div>
       </div>
     )
-  }, [filterText, trafficFilter, statusFilter])
+  }, [filterText, trafficFilter, statusFilter, paymentFilter])
 
   if (loading) return <div style={{ padding: '40px', color: 'white' }}>Cargando dashboard...</div>
 
@@ -704,6 +742,29 @@ export default function AdminDashboard() {
                   <option value="En Proceso">En Proceso</option>
                   <option value="Completado">Completado</option>
                 </select>
+              </div>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Tarifa ($)</label>
+                  <input 
+                    type="number" 
+                    value={formData.fee} 
+                    onChange={e => setFormData({...formData, fee: e.target.value})}
+                    placeholder="Ej. 150000"
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white' }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Estado de Pago</label>
+                  <select 
+                    value={formData.paymentStatus} 
+                    onChange={e => setFormData({...formData, paymentStatus: e.target.value})}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white' }}
+                  >
+                    <option value="Debe">Debe</option>
+                    <option value="Pagado">Pagado</option>
+                  </select>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>

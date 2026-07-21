@@ -14,18 +14,22 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const data = await request.json()
-    const { name, documentNumber, dianPassword, phone, dueDate, status } = data
+    const { name, documentNumber, dianPassword, phone, dueDate, status, fee, paymentStatus } = data
+
+    const updateData: any = {
+      ...(name && { name }),
+      ...(documentNumber && { documentNumber }),
+      ...(dianPassword !== undefined && { dianPassword: dianPassword || null }),
+      ...(phone !== undefined && { phone: phone || null }),
+      ...(dueDate && { dueDate: dueDate ? new Date(dueDate) : undefined }),
+      ...(status && { status }),
+      ...(fee !== undefined && { fee: fee ? parseInt(fee, 10) : null }),
+      ...(paymentStatus !== undefined && { paymentStatus: paymentStatus || 'Debe' })
+    }
 
     const updatedClient = await prisma.client.update({
       where: { id: params.id },
-      data: {
-        name,
-        documentNumber,
-        dianPassword: dianPassword || null,
-        phone: phone || null,
-        dueDate: dueDate ? new Date(dueDate) : undefined,
-        status
-      }
+      data: updateData
     })
 
     return NextResponse.json(updatedClient)

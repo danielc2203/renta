@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json()
-    const { name, documentNumber, dianPassword, phone, dueDate, status } = data
+    const { name, documentNumber, dianPassword, phone, dueDate, status, fee, paymentStatus } = data
 
     if (!name || !documentNumber || !dueDate) {
       return NextResponse.json({ error: 'Faltan datos obligatorios' }, { status: 400 })
@@ -55,7 +55,9 @@ export async function POST(request: Request) {
         dianPassword: dianPassword || null,
         phone: phone || null,
         dueDate: new Date(dueDate),
-        status: status || 'Pendiente'
+        status: status || 'Pendiente',
+        fee: fee ? parseInt(fee, 10) : null,
+        paymentStatus: paymentStatus || 'Debe'
       }
     })
 
