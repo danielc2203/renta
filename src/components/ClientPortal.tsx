@@ -17,7 +17,7 @@ const DOCUMENT_TYPES = [
 ]
 
 export default function ClientPortal({ clientId, isAdmin = false }: { clientId?: string, isAdmin?: boolean }) {
-  const [uploadedDocs, setUploadedDocs] = useState<string[]>([])
+  const [uploadedDocs, setUploadedDocs] = useState<{type: string, id: string}[]>([])
   const [hasDianPassword, setHasDianPassword] = useState(false)
   const [dianPassword, setDianPassword] = useState('')
   const [clientName, setClientName] = useState('')
@@ -33,7 +33,7 @@ export default function ClientPortal({ clientId, isAdmin = false }: { clientId?:
       const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
-        setUploadedDocs(data.uploadedTypes || [])
+        setUploadedDocs(data.uploadedDocs || [])
         setHasDianPassword(data.hasDianPassword || false)
         setClientName(data.clientName || '')
       }
@@ -134,7 +134,8 @@ export default function ClientPortal({ clientId, isAdmin = false }: { clientId?:
         
         {/* Document Cards */}
         {DOCUMENT_TYPES.map(docType => {
-          const isUploaded = uploadedDocs.includes(docType)
+          const uploadedDoc = uploadedDocs.find(d => d.type === docType)
+          const isUploaded = !!uploadedDoc
           const isUploading = uploading === docType
 
           return (
@@ -147,9 +148,19 @@ export default function ClientPortal({ clientId, isAdmin = false }: { clientId?:
                 {!isUploaded && <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>Pendiente por subir (Solo PDF, Máx 2MB)</p>}
               </div>
               
-              <div>
-                <label className="btn" style={{ display: 'block', textAlign: 'center', cursor: isUploading ? 'not-allowed' : 'pointer', background: isUploaded ? 'var(--surface-color)' : 'var(--primary-color)', opacity: isUploading ? 0.7 : 1 }}>
-                  {isUploading ? 'Subiendo...' : (isUploaded ? 'Reemplazar Archivo' : 'Subir Archivo')}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {isUploaded && isAdmin && (
+                  <a 
+                    href={`/api/documents/${uploadedDoc.id}/download`} 
+                    target="_blank" 
+                    className="btn" 
+                    style={{ background: '#3B82F6', flex: 1, textDecoration: 'none', textAlign: 'center', padding: '12px 0', fontSize: '14px', border: 'none' }}
+                  >
+                    Ver / Bajar
+                  </a>
+                )}
+                <label className="btn" style={{ flex: 1, display: 'block', textAlign: 'center', cursor: isUploading ? 'not-allowed' : 'pointer', background: isUploaded ? 'var(--surface-color)' : 'var(--primary-color)', opacity: isUploading ? 0.7 : 1 }}>
+                  {isUploading ? 'Subiendo...' : (isUploaded ? 'Reemplazar' : 'Subir Archivo')}
                   <input 
                     type="file" 
                     accept=".pdf,application/pdf"

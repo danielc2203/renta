@@ -30,12 +30,12 @@ export async function GET(request: Request) {
 
     if (!client) return NextResponse.json({ error: 'Cliente no encontrado' }, { status: 404 })
 
-    const uploadedTypes = client.documents.map(d => d.type)
+    const uploadedDocs = client.documents.map(d => ({ type: d.type, id: d.id }))
 
     return NextResponse.json({
       success: true,
       clientName: client.name,
-      uploadedTypes,
+      uploadedDocs,
       hasDianPassword: !!client.dianPassword
     })
 
