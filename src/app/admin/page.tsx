@@ -231,8 +231,12 @@ export default function AdminDashboard() {
       if (dianCalendarRules) {
         const parsed = JSON.parse(dianCalendarRules)
         if (parsed.august && parsed.august.days && Array.isArray(parsed.august.days)) {
-          if (typeof parsed.august.days[0] === 'string' || typeof parsed.august.days[0] === 'number') {
-            // The DB contains an array of primitives, which is an invalid old format.
+          if (
+            typeof parsed.august.days[0] === 'string' || 
+            typeof parsed.august.days[0] === 'number' || 
+            parsed.august.days[0].day === undefined
+          ) {
+            // The DB contains invalid data (primitives or objects missing the 'day' property).
             // Just use the buildDefaultConfig() (which is already in initialData) to restore the default numbers.
             initialData.august.year = parsed.august.year || '2026'
             initialData.september.year = parsed.september.year || '2026'
