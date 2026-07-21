@@ -26,7 +26,8 @@ export async function GET(request: Request) {
     setAuthCookie(jwtToken)
 
     // Redirigir al portal de cliente
-    return NextResponse.redirect(new URL('/portal', request.url))
+    const baseUrl = process.env.COOLIFY_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://renta.tecco.com.co'
+    return NextResponse.redirect(`${baseUrl}/portal`)
 
   } catch (error) {
     console.error('Verify error:', error)

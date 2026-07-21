@@ -52,8 +52,8 @@ export async function POST(request: Request) {
     // Construct the link (assuming the app is hosted, we use relative or absolute based on request host)
     // For now, we assume it's running on localhost or the deployed domain, but it's better to pass the origin.
     // We'll extract origin from the request.
-    const origin = request.headers.get('origin') || 'http://localhost:2244'
-    const magicLinkUrl = `${origin}/api/auth/verify?token=${magicToken}`
+    const baseUrl = process.env.COOLIFY_URL || process.env.NEXT_PUBLIC_BASE_URL || request.headers.get('origin') || 'https://renta.tecco.com.co'
+    const magicLinkUrl = `${baseUrl}/api/auth/verify?token=${magicToken}`
 
     const dueDateStr = client.dueDate.toLocaleDateString('es-CO')
     
