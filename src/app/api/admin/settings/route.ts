@@ -19,7 +19,7 @@ export async function GET() {
     })
 
     return NextResponse.json({ 
-      whatsappTemplate: (admin?.whatsappTemplate || '').replace('3 días', '{{dias}} días'),
+      whatsappTemplate: (admin?.whatsappTemplate || '').replace(/3 d[ií]as/gi, '{{dias}} días'),
       dianCalendarRules: admin?.dianCalendarRules || '',
       alertDaysRed: admin?.alertDaysRed || 7,
       alertDaysYellow: admin?.alertDaysYellow || 15,
