@@ -525,6 +525,35 @@ export default function AdminDashboard() {
   const warningCount = clients.filter(c => getTrafficLight(c).code === 'AMARILLO').length
   const completedCount = clients.filter(c => getTrafficLight(c).code === 'VERDE' && c.status === 'Completado').length
 
+  const totalPagado = clients.filter(c => c.paymentStatus === 'Pagado').reduce((sum, c) => sum + (c.fee || 0), 0)
+  const totalPendiente = clients.filter(c => c.paymentStatus !== 'Pagado').reduce((sum, c) => sum + (c.fee || 0), 0)
+
+  const handleExportCSV = () => {
+    const headers = ['Nombre', 'Documento', 'Clave DIAN', 'Teléfono', 'Vencimiento', 'Estado', 'Tarifa', 'Pago']
+    const rows = filteredItems.map(c => [
+      c.name,
+      c.documentNumber,
+      c.dianPassword || '',
+      c.phone || '',
+      c.dueDate ? new Date(c.dueDate).toISOString().split('T')[0] : '',
+      c.status,
+      c.fee || 0,
+      c.paymentStatus || 'Debe'
+    ])
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map(e => e.map(String).join(",")).join("\n")
+      
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", "clientes_renta.csv")
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const subHeaderComponentMemo = useMemo(() => {
     return (
       <div style={{ display: 'flex', gap: '16px', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
@@ -574,6 +603,9 @@ export default function AdminDashboard() {
               Limpiar Filtros
             </button>
           )}
+          <button className="btn" onClick={handleExportCSV} style={{ padding: '6px 12px', fontSize: '12px', background: '#10B981', color: 'white', border: 'none' }}>
+            Exportar CSV
+          </button>
         </div>
       </div>
     )
@@ -637,6 +669,20 @@ export default function AdminDashboard() {
         >
           <h3 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px' }}>Completados</h3>
           <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#10B981' }}>{completedCount}</div>
+        </div>
+        <div 
+          className="glass-card" 
+          style={{ padding: '24px', borderLeft: '4px solid #8B5CF6' }}
+        >
+          <h3 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px' }}>Total Recaudado</h3>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#8B5CF6' }}>${totalPagado.toLocaleString('es-CO')}</div>
+        </div>
+        <div 
+          className="glass-card" 
+          style={{ padding: '24px', borderLeft: '4px solid #EC4899' }}
+        >
+          <h3 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px' }}>Total Pendiente</h3>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#EC4899' }}>${totalPendiente.toLocaleString('es-CO')}</div>
         </div>
       </div>
 
