@@ -602,8 +602,8 @@ export default function AdminDashboard() {
           </button>
           <button 
             className="btn" 
-            onClick={() => {
-              document.cookie = 'auth_token=; Max-Age=0; path=/;'
+            onClick={async () => {
+              await fetch('/api/auth/logout', { method: 'POST' })
               router.push('/login')
             }}
             style={{ background: 'var(--surface-color)', border: '1px solid var(--border-color)' }}
