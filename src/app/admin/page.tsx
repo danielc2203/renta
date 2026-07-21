@@ -441,7 +441,7 @@ export default function AdminDashboard() {
       name: 'Vencimiento',
       selector: (row: any) => row.dueDate,
       sortable: true,
-      format: (row: any) => new Date(row.dueDate).toLocaleDateString('es-CO')
+      format: (row: any) => new Date(row.dueDate).toLocaleDateString('es-CO', { timeZone: 'UTC' })
     },
     {
       name: 'Estado',

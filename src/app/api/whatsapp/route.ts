@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     const baseUrl = process.env.COOLIFY_URL || process.env.NEXT_PUBLIC_BASE_URL || request.headers.get('origin') || 'https://renta.tecco.com.co'
     const magicLinkUrl = `${baseUrl}/api/auth/verify?token=${magicToken}`
 
-    const dueDateStr = client.dueDate.toLocaleDateString('es-CO')
+    const dueDateStr = new Date(client.dueDate).toLocaleDateString('es-CO', { timeZone: 'UTC' })
     
     let message = admin?.whatsappTemplate || `Hola {{nombre}}, te recordamos que tu fecha límite para la declaración de renta es el {{vencimiento}}. Por favor, sube tus documentos a nuestro portal seguro usando este enlace único que vence en 3 días: {{enlace}}`
     
