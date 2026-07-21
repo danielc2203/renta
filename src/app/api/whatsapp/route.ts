@@ -30,24 +30,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Cliente no encontrado o sin teléfono' }, { status: 404 })
     }
 
-    // Get Admin template
+    // Get Admin template and settings
     const admin = await prisma.admin.findUnique({
       where: { id: payload.id },
-      select: { whatsappTemplate: true }
+      select: { whatsappTemplate: true, magicLinkExpDays: true }
     })
 
-    // Generate Magic Link (expires in 3 days)
-    const magicToken = uuidv4()
-    const magicExp = new Date()
-    magicExp.setDate(magicExp.getDate() + 3)
+    const expDays = admin?.magicLinkExpDays || 10
 
-    await prisma.client.update({
-      where: { id: client.id },
-      data: {
-        magicLinkToken: magicToken,
-        magicLinkExp: magicExp
-      }
-    })
+    let magicToken = client.magicLinkToken
+    let magicExp = client.magicLinkExp
+    
+    const now = new Date()
+    const oneDayFromNow = new Date()
+    oneDayFromNow.setDate(now.getDate() + 1)
+
+    // Solo generar un nuevo token si no existe o si expira en menos de 1 día
+    if (!magicToken || !magicExp || magicExp < oneDayFromNow) {
+      magicToken = uuidv4()
+      magicExp = new Date()
+      magicExp.setDate(magicExp.getDate() + expDays)
+
+      await prisma.client.update({
+        where: { id: client.id },
+        data: {
+          magicLinkToken: magicToken,
+          magicLinkExp: magicExp
+        }
+      })
+    }
 
     // Construct the link (assuming the app is hosted, we use relative or absolute based on request host)
     // For now, we assume it's running on localhost or the deployed domain, but it's better to pass the origin.

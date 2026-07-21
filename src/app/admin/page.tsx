@@ -74,6 +74,7 @@ export default function AdminDashboard() {
   const [whatsappTemplate, setWhatsappTemplate] = useState('')
   const [alertDaysRed, setAlertDaysRed] = useState(7)
   const [alertDaysYellow, setAlertDaysYellow] = useState(15)
+  const [magicLinkExpDays, setMagicLinkExpDays] = useState(10)
   const [dianCalendarRules, setDianCalendarRules] = useState('')
   
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false)
@@ -181,6 +182,7 @@ export default function AdminDashboard() {
       setDianCalendarRules(data.dianCalendarRules || '')
       setAlertDaysRed(data.alertDaysRed ?? 7)
       setAlertDaysYellow(data.alertDaysYellow ?? 15)
+      setMagicLinkExpDays(data.magicLinkExpDays ?? 10)
     }
   }
 
@@ -194,7 +196,7 @@ export default function AdminDashboard() {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ whatsappTemplate, dianCalendarRules, alertDaysRed, alertDaysYellow })
+      body: JSON.stringify({ whatsappTemplate, dianCalendarRules, alertDaysRed, alertDaysYellow, magicLinkExpDays })
     })
     if (res.ok) {
       setIsSettingsModalOpen(false)
@@ -209,7 +211,7 @@ export default function AdminDashboard() {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ whatsappTemplate, dianCalendarRules: rulesString, alertDaysRed, alertDaysYellow })
+      body: JSON.stringify({ whatsappTemplate, dianCalendarRules: rulesString, alertDaysRed, alertDaysYellow, magicLinkExpDays })
     })
     if (res.ok) {
       setDianCalendarRules(rulesString)
@@ -876,6 +878,21 @@ export default function AdminDashboard() {
                     style={{ width: '100%', padding: '8px', borderRadius: '4px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white' }}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '14px' }}>
+                  Días de validez para el Enlace del Cliente
+                </label>
+                <input 
+                  type="number"
+                  value={magicLinkExpDays}
+                  onChange={e => setMagicLinkExpDays(Number(e.target.value))}
+                  style={{ width: '100%', padding: '8px', borderRadius: '4px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white' }}
+                />
+                <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px' }}>
+                  Cuantos días tendrá el cliente para subir sus documentos antes de que caduque el enlace único.
+                </p>
               </div>
 
               <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>

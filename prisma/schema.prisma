@@ -16,6 +16,7 @@ model Admin {
   name             String
   whatsappTemplate String?
   dianCalendarRules String?
+  magicLinkExpDays Int     @default(10)
 }
 
 model Client {

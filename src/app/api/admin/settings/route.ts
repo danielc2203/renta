@@ -15,14 +15,15 @@ export async function GET() {
 
     const admin = await prisma.admin.findUnique({
       where: { id: payload.id },
-      select: { whatsappTemplate: true, dianCalendarRules: true, alertDaysRed: true, alertDaysYellow: true }
+      select: { whatsappTemplate: true, dianCalendarRules: true, alertDaysRed: true, alertDaysYellow: true, magicLinkExpDays: true }
     })
 
     return NextResponse.json({ 
       whatsappTemplate: admin?.whatsappTemplate || '',
       dianCalendarRules: admin?.dianCalendarRules || '',
       alertDaysRed: admin?.alertDaysRed || 7,
-      alertDaysYellow: admin?.alertDaysYellow || 15
+      alertDaysYellow: admin?.alertDaysYellow || 15,
+      magicLinkExpDays: admin?.magicLinkExpDays || 10
     })
   } catch (error) {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
@@ -39,7 +40,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const { whatsappTemplate, dianCalendarRules, alertDaysRed, alertDaysYellow } = await request.json()
+    const { whatsappTemplate, dianCalendarRules, alertDaysRed, alertDaysYellow, magicLinkExpDays } = await request.json()
 
     await prisma.admin.update({
       where: { id: payload.id },
@@ -47,7 +48,8 @@ export async function PUT(request: Request) {
         whatsappTemplate, 
         dianCalendarRules,
         ...(alertDaysRed !== undefined && { alertDaysRed: parseInt(alertDaysRed, 10) }),
-        ...(alertDaysYellow !== undefined && { alertDaysYellow: parseInt(alertDaysYellow, 10) })
+        ...(alertDaysYellow !== undefined && { alertDaysYellow: parseInt(alertDaysYellow, 10) }),
+        ...(magicLinkExpDays !== undefined && { magicLinkExpDays: parseInt(magicLinkExpDays, 10) })
       }
     })
 
