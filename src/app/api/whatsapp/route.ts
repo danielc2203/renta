@@ -68,12 +68,13 @@ export async function POST(request: Request) {
 
     const dueDateStr = new Date(client.dueDate).toLocaleDateString('es-CO', { timeZone: 'UTC' })
     
-    let message = admin?.whatsappTemplate || `Hola {{nombre}}, te recordamos que tu fecha límite para la declaración de renta es el {{vencimiento}}. Por favor, sube tus documentos a nuestro portal seguro usando este enlace único que vence en 3 días: {{enlace}}`
+    let message = admin?.whatsappTemplate || `Hola {{nombre}}, te recordamos que tu fecha límite para la declaración de renta es el {{vencimiento}}. Por favor, sube tus documentos a nuestro portal seguro usando este enlace único que vence en {{dias}} días: {{enlace}}`
     
     message = message
       .replace(/\{\{nombre\}\}/g, client.name)
       .replace(/\{\{vencimiento\}\}/g, dueDateStr)
       .replace(/\{\{enlace\}\}/g, magicLinkUrl)
+      .replace(/\{\{dias\}\}/g, expDays.toString())
     
     // Format phone: remove spaces/plus, assume Colombia (+57) if no code
     let phoneStr = client.phone.replace(/[^0-9]/g, '')

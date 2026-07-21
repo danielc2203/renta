@@ -850,9 +850,12 @@ export default function AdminDashboard() {
                   rows={4}
                   value={whatsappTemplate} 
                   onChange={e => setWhatsappTemplate(e.target.value)}
-                  placeholder="Hola {{nombre}}, tu declaración vence el {{vencimiento}}..."
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', resize: 'vertical', marginBottom: '16px' }}
+                  placeholder="Hola {{nombre}}, tu declaración vence el {{vencimiento}}. Sube tus documentos: {{enlace}} (Vence en {{dias}} días)"
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', resize: 'vertical', marginBottom: '4px' }}
                 />
+                <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '16px' }}>
+                  Variables disponibles: {'{{nombre}}, {{vencimiento}}, {{enlace}}, {{dias}}'}
+                </p>
               </div>
 
               <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
