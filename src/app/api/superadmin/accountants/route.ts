@@ -22,6 +22,8 @@ export async function GET(request: Request) {
         email: true,
         name: true,
         isActive: true,
+        subscriptionStatus: true,
+        maxClients: true,
         _count: { select: { clients: true } }
       }
     })

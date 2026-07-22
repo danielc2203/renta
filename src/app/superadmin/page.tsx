@@ -13,7 +13,7 @@ export default function SuperAdminDashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [formData, setFormData] = useState({ name: '', email: '', password: '' })
-  const [editData, setEditData] = useState({ id: '', subscriptionStatus: 'ACTIVE', maxClients: 50, email: '' })
+  const [editData, setEditData] = useState({ id: '', subscriptionStatus: 'ACTIVE', maxClients: 50, email: '', name: '' })
   const [searchTerm, setSearchTerm] = useState('')
   const [currentUser, setCurrentUser] = useState<any>(null)
   const router = useRouter()
@@ -73,7 +73,8 @@ export default function SuperAdminDashboard() {
       body: JSON.stringify({ 
         subscriptionStatus: editData.subscriptionStatus, 
         maxClients: parseInt(editData.maxClients.toString()),
-        email: editData.email
+        email: editData.email,
+        name: editData.name
       })
     })
     if (res.ok) {
@@ -122,7 +123,7 @@ export default function SuperAdminDashboard() {
           <button onClick={() => toggleStatus(row.id, row.isActive)} style={{ padding: '6px 12px', background: row.isActive ? '#EF4444' : '#10B981', color: 'white', border: 'none', borderRadius: '4px' }}>
             {row.isActive ? 'Desactivar' : 'Activar'}
           </button>
-          <button onClick={() => { setEditData({ id: row.id, subscriptionStatus: row.subscriptionStatus, maxClients: row.maxClients, email: row.email }); setIsEditModalOpen(true) }} style={{ padding: '6px 12px', background: '#F59E0B', color: 'white', border: 'none', borderRadius: '4px' }}>
+          <button onClick={() => { setEditData({ id: row.id, subscriptionStatus: row.subscriptionStatus, maxClients: row.maxClients, email: row.email, name: row.name }); setIsEditModalOpen(true) }} style={{ padding: '6px 12px', background: '#F59E0B', color: 'white', border: 'none', borderRadius: '4px' }}>
             Editar Plan
           </button>
         </div>
@@ -229,6 +230,9 @@ export default function SuperAdminDashboard() {
           <div style={{ background: '#1e1e1e', padding: '32px', borderRadius: '8px', width: '100%', maxWidth: '400px' }}>
             <h2>Editar Plan de Contador</h2>
             <form onSubmit={handleEditSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+              <label>Nombre del Contador</label>
+              <input type="text" required value={editData.name || ''} onChange={e => setEditData({...editData, name: e.target.value})} style={{ padding: '12px', borderRadius: '4px', background: '#333', color: 'white', border: 'none' }} />
+              
               <label>Correo Electrónico</label>
               <input type="email" required value={editData.email || ''} onChange={e => setEditData({...editData, email: e.target.value})} style={{ padding: '12px', borderRadius: '4px', background: '#333', color: 'white', border: 'none' }} />
               
