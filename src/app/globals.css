@@ -1,6 +1,6 @@
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: var(--primary-color, #2563eb);
+  --primary-hover: var(--primary-color, #1d4ed8);
   --bg-color: #0f172a;
   --surface-color: rgba(30, 41, 59, 0.7);
   --border-color: rgba(255, 255, 255, 0.1);

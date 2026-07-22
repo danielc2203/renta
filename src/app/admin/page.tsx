@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import DataTable, { createTheme } from 'react-data-table-component'
-import { MessageCircle, Eye, Pencil, Trash2 } from 'lucide-react'
+import { MessageCircle, Eye, Pencil, Trash2, BookOpen } from 'lucide-react'
 
 createTheme('dark', {
   text: {
@@ -73,12 +73,18 @@ export default function AdminDashboard() {
   
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [whatsappTemplate, setWhatsappTemplate] = useState('')
+  const [whatsappTemplateWelcome, setWhatsappTemplateWelcome] = useState('')
+  const [whatsappTemplateReady, setWhatsappTemplateReady] = useState('')
   const [alertDaysRed, setAlertDaysRed] = useState(7)
   const [alertDaysYellow, setAlertDaysYellow] = useState(15)
   const [magicLinkExpDays, setMagicLinkExpDays] = useState(10)
   const [dianCalendarRules, setDianCalendarRules] = useState('')
   
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false)
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false)
+  const [selectedClientId, setSelectedClientId] = useState('')
+  const [clientNotes, setClientNotes] = useState<any[]>([])
+  const [newNote, setNewNote] = useState('')
   
   const buildDefaultConfig = () => {
     const config: any = {
@@ -180,6 +186,8 @@ export default function AdminDashboard() {
     if (res.ok) {
       const data = await res.json()
       setWhatsappTemplate(data.whatsappTemplate || '')
+      setWhatsappTemplateWelcome(data.whatsappTemplateWelcome || '')
+      setWhatsappTemplateReady(data.whatsappTemplateReady || '')
       setDianCalendarRules(data.dianCalendarRules || '')
       setAlertDaysRed(data.alertDaysRed ?? 7)
       setAlertDaysYellow(data.alertDaysYellow ?? 15)
@@ -206,7 +214,15 @@ export default function AdminDashboard() {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ whatsappTemplate, dianCalendarRules, alertDaysRed, alertDaysYellow, magicLinkExpDays })
+      body: JSON.stringify({ 
+        whatsappTemplate, 
+        whatsappTemplateWelcome,
+        whatsappTemplateReady,
+        dianCalendarRules, 
+        alertDaysRed, 
+        alertDaysYellow, 
+        magicLinkExpDays 
+      })
     })
     if (res.ok) {
       setIsSettingsModalOpen(false)
@@ -422,6 +438,30 @@ export default function AdminDashboard() {
       fetchClients()
     } else {
       alert('Error al eliminar cliente')
+    }
+  }
+
+  const openNotes = async (clientId: string) => {
+    setSelectedClientId(clientId)
+    setIsNotesModalOpen(true)
+    const res = await fetch(`/api/clients/${clientId}/notes`)
+    if (res.ok) {
+      setClientNotes(await res.json())
+    }
+  }
+
+  const saveNote = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newNote) return
+    const res = await fetch(`/api/clients/${selectedClientId}/notes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: newNote })
+    })
+    if (res.ok) {
+      setNewNote('')
+      const freshRes = await fetch(`/api/clients/${selectedClientId}/notes`)
+      setClientNotes(await freshRes.json())
     }
   }
 
@@ -852,6 +892,52 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {isNotesModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '500px', padding: '32px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2>Bitácora del Cliente</h2>
+              <button onClick={() => setIsNotesModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', fontSize: '20px' }}>&times;</button>
+            </div>
+            
+            <form onSubmit={saveNote} style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+              <input 
+                required
+                value={newNote}
+                onChange={e => setNewNote(e.target.value)}
+                placeholder="Escribe una nota privada..."
+                style={{ flex: 1, padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white' }}
+              />
+              <button type="submit" className="btn" style={{ background: 'var(--primary-color)' }}>
+                Agregar
+              </button>
+            </form>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {clientNotes.length === 0 ? (
+                <p style={{ color: 'var(--text-secondary)' }}>No hay notas para este cliente aún.</p>
+              ) : (
+                clientNotes.map((note: any) => (
+                  <div key={note.id} style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '8px', borderLeft: '3px solid var(--primary-color)' }}>
+                    <p style={{ color: 'white', fontSize: '14px', marginBottom: '8px' }}>{note.content}</p>
+                    <small style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>
+                      {new Date(note.createdAt).toLocaleString('es-CO')}
+                    </small>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {isSettingsModalOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -868,17 +954,43 @@ export default function AdminDashboard() {
             <form onSubmit={saveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>
-                  Plantilla de Mensaje de WhatsApp
+                  Plantilla de Bienvenida
                 </label>
                 <textarea 
-                  rows={4}
+                  rows={3}
+                  value={whatsappTemplateWelcome} 
+                  onChange={e => setWhatsappTemplateWelcome(e.target.value)}
+                  placeholder="Hola {{nombre}}, soy tu contador. Sube tus documentos aquí: {{enlace}}"
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', resize: 'vertical', marginBottom: '4px' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>
+                  Plantilla de Recordatorio
+                </label>
+                <textarea 
+                  rows={3}
                   value={whatsappTemplate} 
                   onChange={e => setWhatsappTemplate(e.target.value)}
-                  placeholder="Hola {{nombre}}, tu declaración vence el {{vencimiento}}. Sube tus documentos: {{enlace}} (Vence en {{dias}} días)"
+                  placeholder="Hola {{nombre}}, tu declaración vence el {{vencimiento}}. (Vence en {{dias}} días)"
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', resize: 'vertical', marginBottom: '4px' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>
+                  Plantilla de Cobro / Completado
+                </label>
+                <textarea 
+                  rows={3}
+                  value={whatsappTemplateReady} 
+                  onChange={e => setWhatsappTemplateReady(e.target.value)}
+                  placeholder="Hola {{nombre}}, tu declaración está lista. El valor a pagar por honorarios es {{fee}}."
                   style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', resize: 'vertical', marginBottom: '4px' }}
                 />
                 <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '16px' }}>
-                  Variables disponibles: {'{{nombre}}, {{vencimiento}}, {{enlace}}, {{dias}}'}
+                  Variables disponibles: {'{{nombre}}, {{vencimiento}}, {{enlace}}, {{dias}}, {{fee}}'}
                 </p>
               </div>
 

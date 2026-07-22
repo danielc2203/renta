@@ -57,6 +57,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Faltan datos obligatorios' }, { status: 400 })
     }
 
+    // Check maxClients limit
+    if (payload.role !== 'SUPERADMIN') {
+      const accountant = await prisma.admin.findUnique({
+        where: { id: payload.id },
+        select: { maxClients: true, _count: { select: { clients: true } } }
+      })
+      if (accountant && accountant._count.clients >= accountant.maxClients) {
+        return NextResponse.json({ error: 'Has alcanzado el límite de clientes de tu plan. Contacta al Súper Administrador.' }, { status: 403 })
+      }
+    }
+
     const newClient = await prisma.client.create({
       data: {
         adminId: payload.id, // Set the client to the logged in user

@@ -15,11 +15,13 @@ export async function GET() {
 
     const admin = await prisma.admin.findUnique({
       where: { id: payload.id },
-      select: { whatsappTemplate: true, dianCalendarRules: true, alertDaysRed: true, alertDaysYellow: true, magicLinkExpDays: true }
+      select: { whatsappTemplate: true, whatsappTemplateWelcome: true, whatsappTemplateReady: true, dianCalendarRules: true, alertDaysRed: true, alertDaysYellow: true, magicLinkExpDays: true }
     })
 
     return NextResponse.json({ 
       whatsappTemplate: (admin?.whatsappTemplate || '').replace(/3 d[ií]as/gi, '{{dias}} días'),
+      whatsappTemplateWelcome: admin?.whatsappTemplateWelcome || '',
+      whatsappTemplateReady: admin?.whatsappTemplateReady || '',
       dianCalendarRules: admin?.dianCalendarRules || '',
       alertDaysRed: admin?.alertDaysRed || 7,
       alertDaysYellow: admin?.alertDaysYellow || 15,
@@ -40,12 +42,14 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const { whatsappTemplate, dianCalendarRules, alertDaysRed, alertDaysYellow, magicLinkExpDays } = await request.json()
+    const { whatsappTemplate, whatsappTemplateWelcome, whatsappTemplateReady, dianCalendarRules, alertDaysRed, alertDaysYellow, magicLinkExpDays } = await request.json()
 
     await prisma.admin.update({
       where: { id: payload.id },
       data: { 
-        whatsappTemplate, 
+        whatsappTemplate,
+        whatsappTemplateWelcome,
+        whatsappTemplateReady,
         dianCalendarRules,
         ...(alertDaysRed !== undefined && { alertDaysRed: parseInt(alertDaysRed, 10) }),
         ...(alertDaysYellow !== undefined && { alertDaysYellow: parseInt(alertDaysYellow, 10) }),

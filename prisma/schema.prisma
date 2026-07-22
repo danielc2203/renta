@@ -14,9 +14,13 @@ model Admin {
   name             String
   role             String   @default("ACCOUNTANT") // ACCOUNTANT, SUPERADMIN
   isActive         Boolean  @default(true)
+  subscriptionStatus String @default("ACTIVE") // ACTIVE, INACTIVE, PAST_DUE
+  maxClients       Int      @default(50)
   alertDaysRed     Int      @default(7)
   alertDaysYellow  Int      @default(15)
-  whatsappTemplate String?
+  whatsappTemplate String?  // Plantilla de Recordatorio
+  whatsappTemplateWelcome String? // Plantilla de Bienvenida
+  whatsappTemplateReady String?   // Plantilla de Cobro/Completado
   dianCalendarRules String?
   magicLinkExpDays Int      @default(10)
   clients          Client[]
@@ -35,6 +39,7 @@ model Client {
   magicLinkToken  String?     @unique
   magicLinkExp    DateTime?
   documents       Document[]
+  notes           ClientNote[]
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   fee             Int?
@@ -44,9 +49,20 @@ model Client {
 model SystemSettings {
   id               Int      @id @default(1)
   appName          String   @default("Renta Colombia")
+  companyName      String   @default("Renta Colombia")
   logoUrl          String?
+  primaryColor     String   @default("#8B5CF6")
+  broadcastMessage String?
   allowNewSignups  Boolean  @default(false)
   updatedAt        DateTime @updatedAt
+}
+
+model ClientNote {
+  id        String   @id @default(uuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
 }
 
 model Document {
