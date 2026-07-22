@@ -72,7 +72,8 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('')
   const [paymentFilter, setPaymentFilter] = useState('')
   
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [isWhatsappModalOpen, setIsWhatsappModalOpen] = useState(false)
+  const [whatsappTargetClient, setWhatsappTargetClient] = useState<any>(null)
   const [whatsappTemplate, setWhatsappTemplate] = useState('')
   const [whatsappTemplateWelcome, setWhatsappTemplateWelcome] = useState('')
   const [whatsappTemplateReady, setWhatsappTemplateReady] = useState('')
@@ -364,11 +365,12 @@ export default function AdminDashboard() {
     )
   }
 
-  const sendWhatsApp = async (clientId: string) => {
+  const sendWhatsApp = async (clientId: string, templateType: string) => {
+    setIsWhatsappModalOpen(false)
     const res = await fetch('/api/whatsapp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId }),
+      body: JSON.stringify({ clientId, templateType }),
     })
     const data = await res.json()
     if (data.waLink) {
@@ -553,7 +555,7 @@ export default function AdminDashboard() {
       width: '180px',
       cell: (row: any) => (
         <div style={{ display: 'flex', gap: '6px' }}>
-          <button title="Enviar WhatsApp" className="btn" onClick={() => sendWhatsApp(row.id)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '4px' }}>
+          <button title="Enviar WhatsApp" className="btn" onClick={() => { setWhatsappTargetClient(row); setIsWhatsappModalOpen(true); }} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '4px' }}>
             <MessageCircle size={18} />
           </button>
           <button title="Ver Portal" className="btn" onClick={() => router.push(`/admin/cliente/${row.id}`)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'var(--primary-color)', color: '#fff', border: 'none', borderRadius: '4px' }}>
@@ -686,10 +688,10 @@ export default function AdminDashboard() {
           </button>
           <button 
             className="btn" 
-            onClick={() => setIsSettingsModalOpen(true)}
+            onClick={() => router.push('/admin/plantillas')}
             style={{ background: 'var(--surface-color)', border: '1px solid var(--border-color)' }}
           >
-            Configurar WApp
+            Configurar Plantillas
           </button>
           {currentUser && currentUser.role === 'SUPERADMIN' && (
             <button 
@@ -939,114 +941,28 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {isSettingsModalOpen && (
+            {/* WhatsApp Template Selection Modal */}
+      {isWhatsappModalOpen && whatsappTargetClient && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.7)',
+          background: 'rgba(0,0,0,0.85)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           zIndex: 1000,
           padding: '20px'
         }}>
-          <div className="glass-card" style={{ width: '100%', maxWidth: '600px', padding: '32px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h2 style={{ marginBottom: '16px' }}>Configuración de Mensajes</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', fontSize: '14px', lineHeight: '1.5' }}>
-              Personaliza el mensaje que se enviará por WhatsApp.
-            </p>
-            <form onSubmit={saveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>
-                  Plantilla de Bienvenida
-                </label>
-                <textarea 
-                  rows={3}
-                  value={whatsappTemplateWelcome} 
-                  onChange={e => setWhatsappTemplateWelcome(e.target.value)}
-                  placeholder="Hola {{nombre}}, soy tu contador. Sube tus documentos aquí: {{enlace}}"
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', resize: 'vertical', marginBottom: '4px' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>
-                  Plantilla de Recordatorio
-                </label>
-                <textarea 
-                  rows={3}
-                  value={whatsappTemplate} 
-                  onChange={e => setWhatsappTemplate(e.target.value)}
-                  placeholder="Hola {{nombre}}, tu declaración vence el {{vencimiento}}. (Vence en {{dias}} días)"
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', resize: 'vertical', marginBottom: '4px' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>
-                  Plantilla de Cobro / Completado
-                </label>
-                <textarea 
-                  rows={3}
-                  value={whatsappTemplateReady} 
-                  onChange={e => setWhatsappTemplateReady(e.target.value)}
-                  placeholder="Hola {{nombre}}, tu declaración está lista. El valor a pagar por honorarios es {{fee}}."
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', resize: 'vertical', marginBottom: '4px' }}
-                />
-                <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '16px' }}>
-                  Variables disponibles: {'{{nombre}}, {{vencimiento}}, {{enlace}}, {{dias}}, {{fee}}'}
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                    Días para Alerta Roja
-                  </label>
-                  <input 
-                    type="number"
-                    value={alertDaysRed}
-                    onChange={e => setAlertDaysRed(Number(e.target.value))}
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white' }}
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                    Días para Alerta Amarilla
-                  </label>
-                  <input 
-                    type="number"
-                    value={alertDaysYellow}
-                    onChange={e => setAlertDaysYellow(Number(e.target.value))}
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                  Días de validez para el Enlace del Cliente
-                </label>
-                <input 
-                  type="number"
-                  value={magicLinkExpDays}
-                  onChange={e => setMagicLinkExpDays(Number(e.target.value))}
-                  style={{ width: '100%', padding: '8px', borderRadius: '4px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white' }}
-                />
-                <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px' }}>
-                  Cuantos días tendrá el cliente para subir sus documentos antes de que caduque el enlace único.
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-                <button type="button" onClick={() => setIsSettingsModalOpen(false)} className="btn" style={{ flex: 1, background: 'transparent', border: '1px solid var(--border-color)' }}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn" style={{ flex: 1, background: 'var(--primary-color)' }}>
-                  Guardar Plantilla
-                </button>
-              </div>
-            </form>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
+            <h2 style={{ marginBottom: '24px', fontSize: '20px' }}>Enviar Mensaje a {whatsappTargetClient.name.split(' ')[0]}</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button onClick={() => sendWhatsApp(whatsappTargetClient.id, 'bienvenida')} className="btn" style={{ background: '#3B82F6', justifyContent: 'center' }}>1. Bienvenida</button>
+              <button onClick={() => sendWhatsApp(whatsappTargetClient.id, 'recordatorio')} className="btn" style={{ background: '#F59E0B', justifyContent: 'center' }}>2. Recordatorio</button>
+              <button onClick={() => sendWhatsApp(whatsappTargetClient.id, 'cobro')} className="btn" style={{ background: '#EF4444', justifyContent: 'center' }}>3. Cobro / Completado</button>
+              <button onClick={() => sendWhatsApp(whatsappTargetClient.id, 'presentada')} className="btn" style={{ background: '#10B981', justifyContent: 'center' }}>4. Declaración Presentada</button>
+            </div>
+            <button onClick={() => setIsWhatsappModalOpen(false)} className="btn" style={{ width: '100%', background: 'transparent', border: '1px solid var(--border-color)', marginTop: '24px', justifyContent: 'center' }}>Cancelar</button>
           </div>
         </div>
       )}
+      
       {isCalendarModalOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,

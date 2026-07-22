@@ -21,6 +21,7 @@ model Admin {
   whatsappTemplate String?  // Plantilla de Recordatorio
   whatsappTemplateWelcome String? // Plantilla de Bienvenida
   whatsappTemplateReady String?   // Plantilla de Cobro/Completado
+  whatsappTemplateFiled String?   // Plantilla de Declaración Presentada (PDF)
   dianCalendarRules String?
   magicLinkExpDays Int      @default(10)
   clients          Client[]

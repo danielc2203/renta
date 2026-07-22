@@ -15,12 +15,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const { email, password, name, isActive } = await request.json()
+    const { email, password, name, isActive, subscriptionStatus, maxClients } = await request.json()
 
     const updateData: any = {
       ...(email && { email }),
       ...(name && { name }),
       ...(isActive !== undefined && { isActive }),
+      ...(subscriptionStatus && { subscriptionStatus }),
+      ...(maxClients !== undefined && { maxClients })
     }
 
     if (password) {

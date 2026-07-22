@@ -13,7 +13,8 @@ export default function SuperAdminDashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [formData, setFormData] = useState({ name: '', email: '', password: '' })
-  const [editData, setEditData] = useState({ id: '', subscriptionStatus: 'ACTIVE', maxClients: 50 })
+  const [editData, setEditData] = useState({ id: '', subscriptionStatus: 'ACTIVE', maxClients: 50, email: '' })
+  const [searchTerm, setSearchTerm] = useState('')
   const router = useRouter()
 
   const fetchAccountants = async () => {
@@ -59,7 +60,11 @@ export default function SuperAdminDashboard() {
     const res = await fetch(`/api/superadmin/accountants/${editData.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscriptionStatus: editData.subscriptionStatus, maxClients: parseInt(editData.maxClients.toString()) })
+      body: JSON.stringify({ 
+        subscriptionStatus: editData.subscriptionStatus, 
+        maxClients: parseInt(editData.maxClients.toString()),
+        email: editData.email
+      })
     })
     if (res.ok) {
       setIsEditModalOpen(false)
@@ -107,7 +112,7 @@ export default function SuperAdminDashboard() {
           <button onClick={() => toggleStatus(row.id, row.isActive)} style={{ padding: '6px 12px', background: row.isActive ? '#EF4444' : '#10B981', color: 'white', border: 'none', borderRadius: '4px' }}>
             {row.isActive ? 'Desactivar' : 'Activar'}
           </button>
-          <button onClick={() => { setEditData({ id: row.id, subscriptionStatus: row.subscriptionStatus, maxClients: row.maxClients }); setIsEditModalOpen(true) }} style={{ padding: '6px 12px', background: '#F59E0B', color: 'white', border: 'none', borderRadius: '4px' }}>
+          <button onClick={() => { setEditData({ id: row.id, subscriptionStatus: row.subscriptionStatus, maxClients: row.maxClients, email: row.email }); setIsEditModalOpen(true) }} style={{ padding: '6px 12px', background: '#F59E0B', color: 'white', border: 'none', borderRadius: '4px' }}>
             Editar Plan
           </button>
         </div>
@@ -161,14 +166,28 @@ export default function SuperAdminDashboard() {
       </div>
 
       <div style={{ background: 'rgba(0,0,0,0.5)', padding: '24px', borderRadius: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', alignItems: 'center' }}>
           <h2>Contadores Registrados</h2>
-          <button onClick={() => setIsModalOpen(true)} style={{ padding: '8px 16px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '4px' }}>
-            + Nuevo Contador
-          </button>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <input 
+              type="text" 
+              placeholder="Buscar por nombre o email..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
+            />
+            <button onClick={() => setIsModalOpen(true)} style={{ padding: '8px 16px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '4px' }}>
+              + Nuevo Contador
+            </button>
+          </div>
         </div>
         
-        <DataTable columns={columns} data={accountants} theme="dark" pagination />
+        <DataTable 
+          columns={columns} 
+          data={accountants.filter(a => a.name.toLowerCase().includes(searchTerm.toLowerCase()) || a.email.toLowerCase().includes(searchTerm.toLowerCase()))} 
+          theme="dark" 
+          pagination 
+        />
       </div>
 
       {isModalOpen && (
@@ -193,6 +212,9 @@ export default function SuperAdminDashboard() {
           <div style={{ background: '#1e1e1e', padding: '32px', borderRadius: '8px', width: '100%', maxWidth: '400px' }}>
             <h2>Editar Plan de Contador</h2>
             <form onSubmit={handleEditSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+              <label>Correo Electrónico</label>
+              <input type="email" required value={editData.email || ''} onChange={e => setEditData({...editData, email: e.target.value})} style={{ padding: '12px', borderRadius: '4px', background: '#333', color: 'white', border: 'none' }} />
+              
               <label>Estado de Suscripción</label>
               <select value={editData.subscriptionStatus} onChange={e => setEditData({...editData, subscriptionStatus: e.target.value})} style={{ padding: '12px', borderRadius: '4px', background: '#333', color: 'white', border: 'none' }}>
                 <option value="ACTIVE">Activo</option>
