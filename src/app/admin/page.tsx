@@ -658,7 +658,7 @@ export default function AdminDashboard() {
           <h1>Dashboard del Contador</h1>
           {currentUser && (
             <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
-              Hola, {currentUser.name.split(' ')[0]} 👋
+              Hola, {(currentUser.name || 'Contador').split(' ')[0]} 👋
             </p>
           )}
         </div>

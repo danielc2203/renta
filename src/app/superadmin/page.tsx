@@ -142,7 +142,7 @@ export default function SuperAdminDashboard() {
           <h1>Panel Súper Administrador</h1>
           {currentUser && (
             <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
-              Hola, {currentUser.name.split(' ')[0]} 👋
+              Hola, {(currentUser.name || 'Admin').split(' ')[0]} 👋
             </p>
           )}
         </div>
