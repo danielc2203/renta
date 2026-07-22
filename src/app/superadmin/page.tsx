@@ -120,7 +120,7 @@ export default function SuperAdminDashboard() {
     { name: 'Estado Login', selector: (row: any) => row.isActive ? 'Activo' : 'Bloqueado', sortable: true },
     { name: 'Suscripción', selector: (row: any) => row.subscriptionStatus, sortable: true },
     {
-      name: 'Acciones',
+      name: 'Acciones', minWidth: '350px',
       cell: (row: any) => (
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => toggleStatus(row.id, row.isActive)} style={{ padding: '6px 12px', background: row.isActive ? '#EF4444' : '#10B981', color: 'white', border: 'none', borderRadius: '4px' }}>

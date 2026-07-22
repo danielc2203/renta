@@ -64,6 +64,7 @@ const customStyles = {
 export default function AdminDashboard() {
   const [clients, setClients] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<any>(null)
   const [filterText, setFilterText] = useState('')
@@ -130,6 +131,9 @@ export default function AdminDashboard() {
   const searchParams = useSearchParams()
   const contadorId = searchParams.get('contadorId')
 
+  const togglePassword = (id: string) => {
+    setVisiblePasswords(prev => ({...prev, [id]: !prev[id]}))
+  }
   const calculateDueDate = (docNumber: string) => {
     const cleanDoc = docNumber.replace(/\D/g, '')
     if (cleanDoc.length < 2) return ''
@@ -483,6 +487,20 @@ export default function AdminDashboard() {
       name: 'Clave DIAN',
       selector: (row: any) => row.dianPassword || '-',
       sortable: false,
+      cell: (row: any) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>{row.dianPassword ? (visiblePasswords[row.id] ? row.dianPassword : '••••••••') : '-'}</span>
+          {row.dianPassword && (
+            <button 
+              onClick={() => togglePassword(row.id)}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px' }}
+              title={visiblePasswords[row.id] ? "Ocultar" : "Mostrar"}
+            >
+              <Eye size={14} />
+            </button>
+          )}
+        </div>
+      )
     },
     {
       name: 'Vencimiento',
