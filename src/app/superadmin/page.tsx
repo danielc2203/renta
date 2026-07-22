@@ -15,6 +15,7 @@ export default function SuperAdminDashboard() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' })
   const [editData, setEditData] = useState({ id: '', subscriptionStatus: 'ACTIVE', maxClients: 50, email: '' })
   const [searchTerm, setSearchTerm] = useState('')
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const router = useRouter()
 
   const fetchAccountants = async () => {
@@ -34,9 +35,18 @@ export default function SuperAdminDashboard() {
     }
   }
 
+  const fetchCurrentUser = async () => {
+    const res = await fetch('/api/auth/me')
+    if (res.ok) {
+      const data = await res.json()
+      setCurrentUser(data.user)
+    }
+  }
+
   useEffect(() => {
     fetchAccountants()
     fetchSettings()
+    fetchCurrentUser()
   }, [])
 
   const handleSave = async (e: React.FormEvent) => {
@@ -128,7 +138,14 @@ export default function SuperAdminDashboard() {
   return (
     <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto', color: 'white' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <h1>Panel Súper Administrador</h1>
+        <div>
+          <h1>Panel Súper Administrador</h1>
+          {currentUser && (
+            <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+              Hola, {currentUser.name.split(' ')[0]} 👋
+            </p>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: '16px' }}>
           <button 
             onClick={() => router.push('/admin')}

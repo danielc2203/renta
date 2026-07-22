@@ -211,29 +211,6 @@ export default function AdminDashboard() {
     fetchCurrentUser()
   }, [])
 
-  const saveSettings = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const res = await fetch('/api/admin/settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        whatsappTemplate, 
-        whatsappTemplateWelcome,
-        whatsappTemplateReady,
-        dianCalendarRules, 
-        alertDaysRed, 
-        alertDaysYellow, 
-        magicLinkExpDays 
-      })
-    })
-    if (res.ok) {
-      setIsSettingsModalOpen(false)
-      alert('Plantilla guardada exitosamente')
-    } else {
-      alert('Error al guardar la configuración')
-    }
-  }
-
   const saveCalendar = async () => {
     const rulesString = JSON.stringify(calendarData)
     const res = await fetch('/api/admin/settings', {
@@ -677,7 +654,14 @@ export default function AdminDashboard() {
   return (
     <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <h1>Dashboard del Contador</h1>
+        <div>
+          <h1>Dashboard del Contador</h1>
+          {currentUser && (
+            <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+              Hola, {currentUser.name.split(' ')[0]} 👋
+            </p>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: '16px' }}>
           <button 
             className="btn" 
