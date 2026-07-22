@@ -8,19 +8,24 @@ datasource db {
 }
 
 model Admin {
-  alertDaysRed     Int     @default(7)
-  alertDaysYellow  Int     @default(15)
-  id               String  @id @default(uuid())
-  email            String  @unique
+  id               String   @id @default(uuid())
+  email            String   @unique
   password         String
   name             String
+  role             String   @default("ACCOUNTANT") // ACCOUNTANT, SUPERADMIN
+  isActive         Boolean  @default(true)
+  alertDaysRed     Int      @default(7)
+  alertDaysYellow  Int      @default(15)
   whatsappTemplate String?
   dianCalendarRules String?
-  magicLinkExpDays Int     @default(10)
+  magicLinkExpDays Int      @default(10)
+  clients          Client[]
 }
 
 model Client {
   id              String      @id @default(uuid())
+  adminId         String?     // Nullable at first for migration, will become required later
+  admin           Admin?      @relation(fields: [adminId], references: [id])
   documentNumber  String      @unique
   name            String
   phone           String?
@@ -34,6 +39,14 @@ model Client {
   updatedAt       DateTime    @updatedAt
   fee             Int?
   paymentStatus   String      @default("Debe") // Debe, Pagado
+}
+
+model SystemSettings {
+  id               Int      @id @default(1)
+  appName          String   @default("Renta Colombia")
+  logoUrl          String?
+  allowNewSignups  Boolean  @default(false)
+  updatedAt        DateTime @updatedAt
 }
 
 model Document {

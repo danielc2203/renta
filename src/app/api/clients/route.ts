@@ -11,13 +11,22 @@ export async function GET(request: Request) {
     }
 
     const payload = verifyToken(token) as any
-    if (!payload || payload.role !== 'admin') {
+    if (!payload || !['admin', 'ACCOUNTANT', 'SUPERADMIN'].includes(payload.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
+    let whereClause = {}
+    if (payload.role !== 'SUPERADMIN') {
+      whereClause = { adminId: payload.id }
+    }
+
     const clients = await prisma.client.findMany({
+      where: whereClause,
       orderBy: { dueDate: 'asc' },
       include: {
+        admin: {
+          select: { name: true }
+        },
         _count: {
           select: { documents: true }
         }
@@ -37,7 +46,7 @@ export async function POST(request: Request) {
     if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const payload = verifyToken(token) as any
-    if (!payload || payload.role !== 'admin') {
+    if (!payload || !['admin', 'ACCOUNTANT', 'SUPERADMIN'].includes(payload.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -50,6 +59,7 @@ export async function POST(request: Request) {
 
     const newClient = await prisma.client.create({
       data: {
+        adminId: payload.id, // Set the client to the logged in user
         name,
         documentNumber,
         dianPassword: dianPassword || null,

@@ -19,6 +19,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 })
     }
 
+    if (!admin.isActive) {
+      return NextResponse.json({ error: 'Cuenta desactivada. Contacte al administrador.' }, { status: 403 })
+    }
+
     const passwordMatch = await bcrypt.compare(password, admin.password)
 
     if (!passwordMatch) {
@@ -26,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     // Login successful
-    const token = signToken({ id: admin.id, email: admin.email, role: 'admin' })
+    const token = signToken({ id: admin.id, email: admin.email, role: admin.role })
     setAuthCookie(token)
 
     return NextResponse.json({ success: true })

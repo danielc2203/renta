@@ -9,8 +9,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const payload = verifyToken(token) as any
-    if (!payload || payload.role !== 'admin') {
+    if (!payload || !['admin', 'ACCOUNTANT', 'SUPERADMIN'].includes(payload.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const existingClient = await prisma.client.findUnique({ where: { id: params.id } })
+    if (!existingClient) {
+      return NextResponse.json({ error: 'Cliente no encontrado' }, { status: 404 })
+    }
+    if (payload.role !== 'SUPERADMIN' && existingClient.adminId !== payload.id) {
+      return NextResponse.json({ error: 'No autorizado para este cliente' }, { status: 403 })
     }
 
     const data = await request.json()
@@ -45,8 +53,16 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const payload = verifyToken(token) as any
-    if (!payload || payload.role !== 'admin') {
+    if (!payload || !['admin', 'ACCOUNTANT', 'SUPERADMIN'].includes(payload.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const existingClient = await prisma.client.findUnique({ where: { id: params.id } })
+    if (!existingClient) {
+      return NextResponse.json({ error: 'Cliente no encontrado' }, { status: 404 })
+    }
+    if (payload.role !== 'SUPERADMIN' && existingClient.adminId !== payload.id) {
+      return NextResponse.json({ error: 'No autorizado para este cliente' }, { status: 403 })
     }
 
     // Optionally delete related documents first if cascade isn't set

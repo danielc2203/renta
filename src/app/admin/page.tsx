@@ -66,6 +66,7 @@ export default function AdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<any>(null)
   const [filterText, setFilterText] = useState('')
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const [trafficFilter, setTrafficFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [paymentFilter, setPaymentFilter] = useState('')
@@ -186,9 +187,18 @@ export default function AdminDashboard() {
     }
   }
 
+  const fetchCurrentUser = async () => {
+    const res = await fetch('/api/auth/me')
+    if (res.ok) {
+      const data = await res.json()
+      setCurrentUser(data.user)
+    }
+  }
+
   useEffect(() => {
     fetchClients()
     fetchSettings()
+    fetchCurrentUser()
   }, [])
 
   const saveSettings = async (e: React.FormEvent) => {
@@ -437,6 +447,11 @@ export default function AdminDashboard() {
       sortable: true,
       wrap: true
     },
+    ...(currentUser?.role === 'SUPERADMIN' ? [{
+      name: 'Contador',
+      selector: (row: any) => row.admin?.name || 'Desconocido',
+      sortable: true,
+    }] : []),
     {
       name: 'Documento',
       selector: (row: any) => row.documentNumber,
@@ -635,6 +650,15 @@ export default function AdminDashboard() {
           >
             Configurar WApp
           </button>
+          {currentUser && currentUser.role === 'SUPERADMIN' && (
+            <button 
+              className="btn" 
+              onClick={() => router.push('/superadmin')}
+              style={{ background: '#8B5CF6', color: 'white', border: 'none' }}
+            >
+              Ir a Súper Admin
+            </button>
+          )}
           <button 
             className="btn" 
             onClick={async () => {
