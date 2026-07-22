@@ -12,6 +12,8 @@ export default function SuperAdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+  const [profileData, setProfileData] = useState({ name: '', email: '', password: '' })
   const [formData, setFormData] = useState({ name: '', email: '', password: '' })
   const [editData, setEditData] = useState({ id: '', subscriptionStatus: 'ACTIVE', maxClients: 50, email: '', name: '' })
   const [searchTerm, setSearchTerm] = useState('')
@@ -40,6 +42,7 @@ export default function SuperAdminDashboard() {
     if (res.ok) {
       const data = await res.json()
       setCurrentUser(data.user)
+      setProfileData({ name: data.user.name || '', email: data.user.email || '', password: '' })
     }
   }
 
@@ -123,6 +126,9 @@ export default function SuperAdminDashboard() {
           <button onClick={() => toggleStatus(row.id, row.isActive)} style={{ padding: '6px 12px', background: row.isActive ? '#EF4444' : '#10B981', color: 'white', border: 'none', borderRadius: '4px' }}>
             {row.isActive ? 'Desactivar' : 'Activar'}
           </button>
+          <button onClick={() => router.push(`/admin?contadorId=${row.id}`)} style={{ padding: '6px 12px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '4px' }}>
+            Ver Clientes
+          </button>
           <button onClick={() => { setEditData({ id: row.id, subscriptionStatus: row.subscriptionStatus, maxClients: row.maxClients, email: row.email, name: row.name }); setIsEditModalOpen(true) }} style={{ padding: '6px 12px', background: '#F59E0B', color: 'white', border: 'none', borderRadius: '4px' }}>
             Editar Plan
           </button>
@@ -136,6 +142,26 @@ export default function SuperAdminDashboard() {
   const totalClients = accountants.reduce((acc, curr) => acc + curr._count.clients, 0)
   const totalAccountants = accountants.length
 
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!currentUser) return
+    const res = await fetch(`/api/superadmin/accountants/${currentUser.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        name: profileData.name,
+        email: profileData.email,
+        ...(profileData.password && { password: profileData.password })
+      })
+    })
+    if (res.ok) {
+      setIsProfileModalOpen(false)
+      fetchCurrentUser()
+      alert('Perfil actualizado correctamente')
+    } else {
+      alert('Error al actualizar perfil')
+    }
+  }
   return (
     <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto', color: 'white' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
@@ -148,11 +174,12 @@ export default function SuperAdminDashboard() {
           )}
         </div>
         <div style={{ display: 'flex', gap: '16px' }}>
+          
           <button 
-            onClick={() => router.push('/admin')}
-            style={{ padding: '8px 16px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '4px' }}
+            onClick={() => setIsProfileModalOpen(true)}
+            style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '4px' }}
           >
-            Volver a Clientes
+            Mi Perfil
           </button>
           <button 
             onClick={() => setIsSettingsModalOpen(true)}
@@ -272,6 +299,28 @@ export default function SuperAdminDashboard() {
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button type="button" onClick={() => setIsSettingsModalOpen(false)} style={{ padding: '8px 16px', background: '#4B5563', color: 'white', border: 'none', borderRadius: '4px' }}>Cerrar</button>
                 <button type="submit" style={{ padding: '8px 16px', background: '#10B981', color: 'white', border: 'none', borderRadius: '4px' }}>Guardar Ajustes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {isProfileModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#1e1e1e', padding: '32px', borderRadius: '8px', width: '100%', maxWidth: '400px' }}>
+            <h2>Mi Perfil</h2>
+            <form onSubmit={handleProfileSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+              <label>Mi Nombre</label>
+              <input type="text" required value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} style={{ padding: '12px', borderRadius: '4px', background: '#333', color: 'white', border: 'none' }} />
+              
+              <label>Correo Electrónico</label>
+              <input type="email" required value={profileData.email} onChange={e => setProfileData({...profileData, email: e.target.value})} style={{ padding: '12px', borderRadius: '4px', background: '#333', color: 'white', border: 'none' }} />
+              
+              <label>Nueva Contraseña (Opcional)</label>
+              <input type="password" placeholder="Dejar en blanco para mantener" value={profileData.password} onChange={e => setProfileData({...profileData, password: e.target.value})} style={{ padding: '12px', borderRadius: '4px', background: '#333', color: 'white', border: 'none' }} />
+              
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
+                <button type="button" onClick={() => setIsProfileModalOpen(false)} style={{ padding: '8px 16px', background: '#4B5563', color: 'white', border: 'none', borderRadius: '4px' }}>Cancelar</button>
+                <button type="submit" style={{ padding: '8px 16px', background: '#10B981', color: 'white', border: 'none', borderRadius: '4px' }}>Guardar Cambios</button>
               </div>
             </form>
           </div>

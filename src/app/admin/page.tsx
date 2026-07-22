@@ -2,7 +2,7 @@
 
 
 import { useEffect, useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import DataTable, { createTheme } from 'react-data-table-component'
 import { MessageCircle, Eye, Pencil, Trash2, BookOpen } from 'lucide-react'
 
@@ -127,6 +127,8 @@ export default function AdminDashboard() {
   })
 
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const contadorId = searchParams.get('contadorId')
 
   const calculateDueDate = (docNumber: string) => {
     const cleanDoc = docNumber.replace(/\D/g, '')
@@ -174,7 +176,7 @@ export default function AdminDashboard() {
   }
 
   const fetchClients = async () => {
-    const res = await fetch('/api/clients')
+    const res = await fetch('/api/clients' + (contadorId ? `?contadorId=${contadorId}` : ''))
     if (res.ok) {
       setClients(await res.json())
     } else if (res.status === 401) {
@@ -677,13 +679,22 @@ export default function AdminDashboard() {
           >
             Configurar Plantillas
           </button>
-          {currentUser && currentUser.role === 'SUPERADMIN' && (
+          {currentUser && currentUser.role === 'SUPERADMIN' && !contadorId && (
             <button 
               className="btn" 
               onClick={() => router.push('/superadmin')}
               style={{ background: '#8B5CF6', color: 'white', border: 'none' }}
             >
               Ir a Súper Admin
+            </button>
+          )}
+          {currentUser && currentUser.role === 'SUPERADMIN' && contadorId && (
+            <button 
+              className="btn" 
+              onClick={() => router.push('/superadmin')}
+              style={{ background: '#3B82F6', color: 'white', border: 'none' }}
+            >
+              Volver a Súper Admin
             </button>
           )}
           <button 

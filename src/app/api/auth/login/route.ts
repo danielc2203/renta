@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const token = signToken({ id: admin.id, email: admin.email, role: admin.role })
     setAuthCookie(token)
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, role: admin.role })
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })

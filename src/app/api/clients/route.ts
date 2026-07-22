@@ -16,8 +16,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const contadorId = searchParams.get('contadorId')
+
     let whereClause: any = {}
-    if (payload.role !== 'SUPERADMIN') {
+    
+    if (payload.role === 'SUPERADMIN' && contadorId) {
+      whereClause = { adminId: contadorId }
+    } else if (payload.role !== 'SUPERADMIN') {
       whereClause = {
         OR: [
           { adminId: payload.id },
