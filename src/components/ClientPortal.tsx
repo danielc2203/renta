@@ -21,6 +21,7 @@ export default function ClientPortal({ clientId, isAdmin = false }: { clientId?:
   const [hasDianPassword, setHasDianPassword] = useState(false)
   const [dianPassword, setDianPassword] = useState('')
   const [clientName, setClientName] = useState('')
+  const [accountantName, setAccountantName] = useState('')
   const [loading, setLoading] = useState(true)
   
   const [uploading, setUploading] = useState<string | null>(null)
@@ -36,6 +37,7 @@ export default function ClientPortal({ clientId, isAdmin = false }: { clientId?:
         setUploadedDocs(data.uploadedDocs || [])
         setHasDianPassword(data.hasDianPassword || false)
         setClientName(data.clientName || '')
+        setAccountantName(data.accountantName || '')
       }
     } catch (err) {
       console.error(err)
@@ -125,7 +127,7 @@ export default function ClientPortal({ clientId, isAdmin = false }: { clientId?:
   return (
     <div style={{ padding: '40px 20px', maxWidth: '1000px', margin: '0 auto' }}>
       <h1 style={{ marginBottom: '8px' }}>Mi Declaración de Renta 2026</h1>
-      {clientName && <h2 style={{ marginBottom: '32px', color: 'var(--text-secondary)' }}>Cliente: {clientName} {isAdmin && '(Modo Admin)'}</h2>}
+      {clientName && <h2 style={{ marginBottom: '32px', color: 'var(--text-secondary)' }}>Cliente: {clientName} {isAdmin ? `(Modo Admin)` : accountantName ? `(Contador: ${accountantName})` : ''}</h2>}
 
       {error && <div style={{ color: 'var(--danger)', marginBottom: '16px', padding: '12px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px' }}>{error}</div>}
       {message && <div style={{ color: 'var(--success)', marginBottom: '16px', padding: '12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px' }}>{message}</div>}

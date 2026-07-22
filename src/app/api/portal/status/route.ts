@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     if (!payload) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     let clientId = payload.id
-    if (payload.role === 'admin') {
+    if ((payload.role === 'ACCOUNTANT' || payload.role === 'SUPERADMIN')) {
       const { searchParams } = new URL(request.url)
       const requestedClientId = searchParams.get('clientId')
       if (!requestedClientId) return NextResponse.json({ error: 'clientId requerido' }, { status: 400 })
@@ -24,7 +24,8 @@ export async function GET(request: Request) {
     const client = await prisma.client.findUnique({
       where: { id: clientId },
       include: {
-        documents: true
+        documents: true,
+        admin: true
       }
     })
 
@@ -35,6 +36,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       clientName: client.name,
+      accountantName: client.admin?.name || 'Desconocido',
       uploadedDocs,
       hasDianPassword: !!client.dianPassword
     })

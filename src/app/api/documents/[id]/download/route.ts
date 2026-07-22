@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const payload = verifyToken(token) as any
-    if (!payload || payload.role !== 'admin') {
+    if (!payload || payload.role !== 'ACCOUNTANT' && payload.role !== 'SUPERADMIN') {
       return new NextResponse('No autorizado', { status: 401 })
     }
 
