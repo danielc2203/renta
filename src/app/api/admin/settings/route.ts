@@ -10,7 +10,7 @@ export async function GET() {
     if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     
     const payload = verifyToken(token) as any
-    if (!payload || payload.role !== 'admin') {
+    if (!payload || !['admin', 'ACCOUNTANT', 'SUPERADMIN'].includes(payload.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -39,7 +39,7 @@ export async function PUT(request: Request) {
     if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     
     const payload = verifyToken(token) as any
-    if (!payload || payload.role !== 'admin') {
+    if (!payload || !['admin', 'ACCOUNTANT', 'SUPERADMIN'].includes(payload.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 

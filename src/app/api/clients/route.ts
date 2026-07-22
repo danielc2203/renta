@@ -16,9 +16,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    let whereClause = {}
+    let whereClause: any = {}
     if (payload.role !== 'SUPERADMIN') {
-      whereClause = { adminId: payload.id }
+      whereClause = {
+        OR: [
+          { adminId: payload.id },
+          { adminId: null }
+        ]
+      }
     }
 
     const clients = await prisma.client.findMany({
