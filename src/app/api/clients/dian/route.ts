@@ -19,8 +19,15 @@ export async function POST(request: Request) {
     }
 
     let clientId = payload.id
-    if (payload.role === 'admin') {
+    if (payload.role === 'admin' || payload.role === 'ACCOUNTANT' || payload.role === 'SUPERADMIN') {
       if (!providedClientId) return NextResponse.json({ error: 'clientId requerido' }, { status: 400 })
+      
+      if (payload.role !== 'SUPERADMIN') {
+        const clientCheck = await prisma.client.findUnique({ where: { id: providedClientId } })
+        if (!clientCheck || clientCheck.adminId !== payload.id) {
+          return NextResponse.json({ error: 'No autorizado para este cliente' }, { status: 403 })
+        }
+      }
       clientId = providedClientId
     }
 

@@ -27,10 +27,15 @@ export async function GET(
 
     const document = await prisma.document.findUnique({
       where: { id: params.id },
+      include: { client: true }
     })
 
     if (!document) {
       return new NextResponse('No encontrado', { status: 404 })
+    }
+
+    if (payload.role !== 'SUPERADMIN' && document.client.adminId !== payload.id) {
+      return new NextResponse('No autorizado para este documento', { status: 403 })
     }
 
     const filePath = path.join(UPLOAD_DIR, document.filePath)

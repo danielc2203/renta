@@ -483,7 +483,7 @@ export default function AdminDashboard() {
     }
   }
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       name: 'Alerta',
       width: '90px',
@@ -606,7 +606,7 @@ export default function AdminDashboard() {
         </div>
       )
     },
-  ]
+  ], [currentUser, visiblePasswords, router])
 
   const filteredItems = clients.filter(item => {
     const matchesText = item.name.toLowerCase().includes(filterText.toLowerCase()) || 

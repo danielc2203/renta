@@ -42,8 +42,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       message: 'Si el documento existe, se ha enviado un enlace.',
-      // SOLO PARA PRUEBAS:
-      _testLink: magicLink
+      ...(process.env.NODE_ENV === 'development' && { _testLink: magicLink })
     })
 
   } catch (error) {

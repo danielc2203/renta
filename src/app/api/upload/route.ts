@@ -33,9 +33,16 @@ export async function POST(request: Request) {
     const providedClientId = formData.get('clientId') as string | null
 
     let clientId = payload.id
-    if (payload.role === 'admin') {
+    if (payload.role === 'admin' || payload.role === 'ACCOUNTANT' || payload.role === 'SUPERADMIN') {
       if (!providedClientId) {
         return NextResponse.json({ error: 'Falta clientId' }, { status: 400 })
+      }
+      
+      if (payload.role !== 'SUPERADMIN') {
+        const clientCheck = await prisma.client.findUnique({ where: { id: providedClientId } })
+        if (!clientCheck || clientCheck.adminId !== payload.id) {
+          return NextResponse.json({ error: 'No autorizado para este cliente' }, { status: 403 })
+        }
       }
       clientId = providedClientId
     } else if (payload.role !== 'client') {

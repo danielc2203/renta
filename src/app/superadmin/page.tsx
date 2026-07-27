@@ -1,7 +1,7 @@
 'use client'
 
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import DataTable from 'react-data-table-component'
 
@@ -139,7 +139,7 @@ export default function SuperAdminDashboard() {
     }
   }
 
-  const columns = [
+  const columns = useMemo(() => [
     { name: 'Nombre', selector: (row: any) => row.name, sortable: true },
     { name: 'Email', selector: (row: any) => row.email, sortable: true },
     { name: 'Clientes', selector: (row: any) => `${row._count.clients} / ${row.maxClients}`, sortable: true },
@@ -161,7 +161,7 @@ export default function SuperAdminDashboard() {
         </div>
       )
     }
-  ]
+  ], [router])
 
   if (loading) return <div style={{ padding: '40px', color: 'white' }}>Cargando...</div>
 
