@@ -549,8 +549,12 @@ export default function AdminDashboard() {
           padding: '4px 8px', 
           borderRadius: '4px', 
           fontSize: '12px',
-          background: row.status === 'Completado' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)',
-          color: row.status === 'Completado' ? 'var(--success)' : 'var(--danger)'
+          background: row.status === 'Completado' ? 'rgba(16,185,129,0.2)' : 
+                      row.status === 'En Proceso' ? 'rgba(59,130,246,0.2)' : 
+                      'rgba(239,68,68,0.2)',
+          color: row.status === 'Completado' ? 'var(--success)' : 
+                 row.status === 'En Proceso' ? '#3B82F6' : 
+                 'var(--danger)'
         }}>
           {row.status}
         </span>
