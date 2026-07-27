@@ -970,6 +970,7 @@ export default function AdminDashboard() {
               <button onClick={() => sendWhatsApp(whatsappTargetClient.id, 'recordatorio')} className="btn" style={{ background: '#F59E0B', justifyContent: 'center' }}>2. Recordatorio</button>
               <button onClick={() => sendWhatsApp(whatsappTargetClient.id, 'cobro')} className="btn" style={{ background: '#EF4444', justifyContent: 'center' }}>3. Cobro / Completado</button>
               <button onClick={() => sendWhatsApp(whatsappTargetClient.id, 'presentada')} className="btn" style={{ background: '#10B981', justifyContent: 'center' }}>4. Declaración Presentada</button>
+              <button onClick={() => sendWhatsApp(whatsappTargetClient.id, 'consulta_vencimiento')} className="btn" style={{ background: '#8B5CF6', justifyContent: 'center' }}>5. Consulta Vencimiento</button>
             </div>
             <button onClick={() => setIsWhatsappModalOpen(false)} className="btn" style={{ width: '100%', background: 'transparent', border: '1px solid var(--border-color)', marginTop: '24px', justifyContent: 'center' }}>Cancelar</button>
           </div>

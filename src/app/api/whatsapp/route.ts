@@ -83,6 +83,10 @@ export async function POST(request: Request) {
     } else if (templateType === 'presentada') {
       rawTemplate = admin?.whatsappTemplateFiled || ''
       defaultTemplate = `Hola {{nombre}}, te confirmo que tu declaración de renta ha sido presentada exitosamente en la DIAN. Puedes descargar el formulario en PDF desde nuestro portal: {{enlace}}`
+    } else if (templateType === 'consulta_vencimiento') {
+      // The enlace here points to the public page
+      const publicLink = `${baseUrl}/consulta-vencimiento`;
+      defaultTemplate = `Hola {{nombre}} consulte aquí el vencimiento de su declaración de renta del año gravable 2025, digitando tu numero de cedula. ${publicLink}`
     } else {
       // Default: recordatorio
       rawTemplate = admin?.whatsappTemplate || ''
