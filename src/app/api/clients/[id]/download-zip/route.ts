@@ -71,7 +71,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const stream = new ReadableStream({
       start(controller) {
         archive.on('data', (chunk: any) => {
-          controller.enqueue(chunk)
+          controller.enqueue(new Uint8Array(chunk))
         })
         archive.on('end', () => {
           controller.close()

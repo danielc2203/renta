@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "archiver": "^8.0.0",
+    "archiver": "^5.3.2",
     "bcrypt": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.25.0",
