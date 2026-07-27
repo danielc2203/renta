@@ -139,6 +139,28 @@ export default function SuperAdminDashboard() {
     }
   }
 
+  const logsColumns = useMemo(() => [
+    { name: 'Fecha', selector: (r: any) => new Date(r.createdAt).toLocaleString(), sortable: true, width: '180px' },
+    { name: 'Contador', selector: (r: any) => r.admin?.name || 'Sistema', sortable: true, width: '200px' },
+    { name: 'Acción', selector: (r: any) => r.action, sortable: true, width: '150px' },
+    { name: 'Detalle', selector: (r: any) => r.details, wrap: true }
+  ], [])
+
+  const trashColumns = useMemo(() => [
+    { name: 'Cliente', selector: (r: any) => r.name, sortable: true },
+    { name: 'Documento', selector: (r: any) => r.documentNumber, sortable: true },
+    { name: 'Contador Asignado', selector: (r: any) => r.admin?.name || '-', sortable: true },
+    { name: 'Eliminado el', selector: (r: any) => new Date(r.updatedAt).toLocaleString(), sortable: true },
+    {
+      name: 'Acciones',
+      cell: (row: any) => (
+        <button onClick={() => handleRestoreClient(row.id)} style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          Restaurar
+        </button>
+      )
+    }
+  ], [])
+
   const columns = useMemo(() => [
     { name: 'Nombre', selector: (row: any) => row.name, sortable: true },
     { name: 'Email', selector: (row: any) => row.email, sortable: true },
@@ -373,12 +395,7 @@ export default function SuperAdminDashboard() {
 
             {auditTab === 'LOGS' && (
               <DataTable 
-                columns={[
-                  { name: 'Fecha', selector: (r: any) => new Date(r.createdAt).toLocaleString(), sortable: true, width: '180px' },
-                  { name: 'Contador', selector: (r: any) => r.admin?.name || 'Sistema', sortable: true, width: '200px' },
-                  { name: 'Acción', selector: (r: any) => r.action, sortable: true, width: '150px' },
-                  { name: 'Detalle', selector: (r: any) => r.details, wrap: true }
-                ]}
+                columns={logsColumns}
                 data={auditLogs}
                 theme="dark"
                 pagination
@@ -388,20 +405,7 @@ export default function SuperAdminDashboard() {
 
             {auditTab === 'TRASH' && (
               <DataTable 
-                columns={[
-                  { name: 'Cliente', selector: (r: any) => r.name, sortable: true },
-                  { name: 'Documento', selector: (r: any) => r.documentNumber, sortable: true },
-                  { name: 'Contador Asignado', selector: (r: any) => r.admin?.name || '-', sortable: true },
-                  { name: 'Eliminado el', selector: (r: any) => new Date(r.updatedAt).toLocaleString(), sortable: true },
-                  {
-                    name: 'Acciones',
-                    cell: (row: any) => (
-                      <button onClick={() => handleRestoreClient(row.id)} style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                        Restaurar
-                      </button>
-                    )
-                  }
-                ]}
+                columns={trashColumns}
                 data={deletedClients}
                 theme="dark"
                 pagination
