@@ -76,7 +76,32 @@ export async function POST(request: Request) {
 
     if (templateType === 'bienvenida') {
       rawTemplate = admin?.whatsappTemplateWelcome || ''
-      defaultTemplate = `Hola {{nombre}}, soy tu contador. Por favor, sube tus documentos aquí: {{enlace}}`
+      defaultTemplate = `Hola *{{nombre}}*, buen dia te recuerdo que la fecha límite para presentar tu *declaración de Renta* vence el *{{vencimiento}}*.
+ 
+Para evitar sanciones e intereses, te sugiero tener todo listo *8 días antes del vencimiento*.
+ 
+Para avanzar, por favor carga los siguientes documentos:
+ 
+*1. Patrimonio (Bienes y Deudas).*
+* *Valor de muebles y enseres; Inmuebles (Casas, Apartamentos, Fincas):* Declaración de impuesto predial del año gravable.
+* *Vehículos:* Declaración de los impuestos de vehículos del año gravable.
+* *Sociedades:* Certificado tributario de inversión o participación en sociedades.
+* *Bancos:* Certificado tributario de saldos en cuentas de ahorro o corrientes, CDT y créditos con corte a 31 de diciembre de 2025.
+ 
+*2. Ingresos y deducciones:*
+* *Laborales o independientes:*
+Certificado de ingresos y retenciones
+* *Arrendamientos:* Relación de ingresos por arriendos.
+* *Salud:* Certificado de medicina prepagada o plan complementario.
+* *Aportes:* Certificación de seguridad social (salud y pensión) y aportes voluntarios a fondos de pensión o cuentas *AFC*.
+ 
+*3. Información Formal y Dependientes:*
+* Copia del *RUT* actualizado.
+* Copia de la declaración de renta del año anterior.
+* Relación de dependientes económicos (Hijos menores, padres, hermanos, etc.).
+* Credenciales de acceso a la página de la *DIAN* (usuario y contraseña).
+ 
+Esto lo puedes hacer en el siguiente enlace: {{enlace}}`
     } else if (templateType === 'cobro') {
       rawTemplate = admin?.whatsappTemplateReady || ''
       defaultTemplate = `Hola {{nombre}}, tu declaración de renta está lista. El valor a pagar por honorarios es {{fee}}.`
