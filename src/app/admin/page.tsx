@@ -4,7 +4,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import DataTable, { createTheme } from 'react-data-table-component'
-import { MessageCircle, Eye, Pencil, Trash2, BookOpen } from 'lucide-react'
+import { MessageCircle, Eye, Pencil, Trash2, BookOpen, DownloadCloud } from 'lucide-react'
+import Swal from 'sweetalert2'
 
 createTheme('dark', {
   text: {
@@ -418,13 +419,44 @@ export default function AdminDashboard() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este cliente?')) return
-    const res = await fetch(`/api/clients/${id}`, { method: 'DELETE' })
-    if (res.ok) {
-      fetchClients()
-    } else {
-      alert('Error al eliminar cliente')
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: "El cliente será eliminado de tu lista, aunque podrás solicitar al Super Administrador que lo restaure en caso de error.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#EF4444',
+      cancelButtonColor: '#4B5563',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#1F2937',
+      color: '#fff'
+    })
+
+    if (result.isConfirmed) {
+      const res = await fetch(`/api/clients/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        fetchClients()
+        Swal.fire({
+          title: 'Eliminado!',
+          text: 'El cliente ha sido eliminado.',
+          icon: 'success',
+          background: '#1F2937',
+          color: '#fff'
+        })
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: 'Error al eliminar cliente',
+          icon: 'error',
+          background: '#1F2937',
+          color: '#fff'
+        })
+      }
     }
+  }
+
+  const handleDownloadZIP = (id: string) => {
+    window.location.href = `/api/clients/${id}/download-zip`
   }
 
   const openNotes = async (clientId: string) => {
@@ -560,6 +592,9 @@ export default function AdminDashboard() {
           </button>
           <button title="Editar" className="btn" onClick={() => openModal(row)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '4px' }}>
             <Pencil size={18} />
+          </button>
+          <button title="Descargar ZIP" className="btn" onClick={() => handleDownloadZIP(row.id)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '4px' }}>
+            <DownloadCloud size={18} />
           </button>
           <button title="Eliminar" className="btn" onClick={() => handleDelete(row.id)} style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'rgba(239,68,68,0.2)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: '4px' }}>
             <Trash2 size={18} />

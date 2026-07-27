@@ -19,12 +19,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const contadorId = searchParams.get('contadorId')
 
-    let whereClause: any = {}
+    let whereClause: any = { isDeleted: false }
     
     if (payload.role === 'SUPERADMIN' && contadorId) {
-      whereClause = { adminId: contadorId }
+      whereClause = { adminId: contadorId, isDeleted: false }
     } else if (payload.role !== 'SUPERADMIN') {
       whereClause = {
+        isDeleted: false,
         OR: [
           { adminId: payload.id },
           { adminId: null }

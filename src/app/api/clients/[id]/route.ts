@@ -66,12 +66,20 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado para este cliente' }, { status: 403 })
     }
 
-    // Optionally delete related documents first if cascade isn't set
-    await prisma.document.deleteMany({ where: { clientId: params.id } })
-
-    await prisma.client.delete({
-      where: { id: params.id }
+    await prisma.client.update({
+      where: { id: params.id },
+      data: { isDeleted: true }
     })
+
+    if (payload.id) {
+      await prisma.auditLog.create({
+        data: {
+          adminId: payload.id,
+          action: 'DELETE_CLIENT',
+          details: `Cliente eliminado: ${existingClient.name} (Doc: ${existingClient.documentNumber})`
+        }
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

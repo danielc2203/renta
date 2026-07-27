@@ -25,6 +25,7 @@ model Admin {
   dianCalendarRules String?
   magicLinkExpDays Int      @default(10)
   clients          Client[]
+  auditLogs        AuditLog[]
 }
 
 model Client {
@@ -45,6 +46,7 @@ model Client {
   updatedAt       DateTime    @updatedAt
   fee             Int?
   paymentStatus   String      @default("Debe") // Debe, Pagado
+  isDeleted       Boolean     @default(false)
 }
 
 model SystemSettings {
@@ -74,4 +76,13 @@ model Document {
   filePath   String
   fileName   String
   uploadedAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
 }

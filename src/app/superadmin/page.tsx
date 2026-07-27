@@ -18,6 +18,12 @@ export default function SuperAdminDashboard() {
   const [editData, setEditData] = useState({ id: '', subscriptionStatus: 'ACTIVE', maxClients: 50, email: '', name: '' })
   const [searchTerm, setSearchTerm] = useState('')
   const [currentUser, setCurrentUser] = useState<any>(null)
+  
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false)
+  const [auditLogs, setAuditLogs] = useState<any[]>([])
+  const [deletedClients, setDeletedClients] = useState<any[]>([])
+  const [auditTab, setAuditTab] = useState<'LOGS' | 'TRASH'>('LOGS')
+
   const router = useRouter()
 
   const fetchAccountants = async () => {
@@ -46,10 +52,19 @@ export default function SuperAdminDashboard() {
     }
   }
 
+  const fetchAuditData = async () => {
+    const logsRes = await fetch('/api/superadmin/audit')
+    if (logsRes.ok) setAuditLogs(await logsRes.json())
+      
+    const trashRes = await fetch('/api/superadmin/deleted-clients')
+    if (trashRes.ok) setDeletedClients(await trashRes.json())
+  }
+
   useEffect(() => {
     fetchAccountants()
     fetchSettings()
     fetchCurrentUser()
+    fetchAuditData()
   }, [])
 
   const handleSave = async (e: React.FormEvent) => {
@@ -113,6 +128,17 @@ export default function SuperAdminDashboard() {
     if (res.ok) fetchAccountants()
   }
 
+  const handleRestoreClient = async (id: string) => {
+    if (!confirm('¿Restaurar este cliente?')) return
+    const res = await fetch(`/api/superadmin/clients/${id}/restore`, { method: 'POST' })
+    if (res.ok) {
+      fetchAuditData()
+      alert('Cliente restaurado correctamente')
+    } else {
+      alert('Error al restaurar')
+    }
+  }
+
   const columns = [
     { name: 'Nombre', selector: (row: any) => row.name, sortable: true },
     { name: 'Email', selector: (row: any) => row.email, sortable: true },
@@ -174,7 +200,12 @@ export default function SuperAdminDashboard() {
           )}
         </div>
         <div style={{ display: 'flex', gap: '16px' }}>
-          
+          <button 
+            onClick={() => setIsAuditModalOpen(true)}
+            style={{ padding: '8px 16px', background: 'rgba(245,158,11,0.2)', color: '#F59E0B', border: '1px solid #F59E0B', borderRadius: '4px' }}
+          >
+            Auditoría y Papelera
+          </button>
           <button 
             onClick={() => setIsProfileModalOpen(true)}
             style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '4px' }}
@@ -323,6 +354,60 @@ export default function SuperAdminDashboard() {
                 <button type="submit" style={{ padding: '8px 16px', background: '#10B981', color: 'white', border: 'none', borderRadius: '4px' }}>Guardar Cambios</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isAuditModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#1e1e1e', padding: '32px', borderRadius: '8px', width: '100%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2>Auditoría y Papelera</h2>
+              <button onClick={() => setIsAuditModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+              <button onClick={() => setAuditTab('LOGS')} style={{ padding: '8px 16px', background: auditTab === 'LOGS' ? '#3B82F6' : '#333', color: 'white', border: 'none', borderRadius: '4px' }}>Registro de Acciones</button>
+              <button onClick={() => setAuditTab('TRASH')} style={{ padding: '8px 16px', background: auditTab === 'TRASH' ? '#EF4444' : '#333', color: 'white', border: 'none', borderRadius: '4px' }}>Papelera de Clientes</button>
+            </div>
+
+            {auditTab === 'LOGS' && (
+              <DataTable 
+                columns={[
+                  { name: 'Fecha', selector: (r: any) => new Date(r.createdAt).toLocaleString(), sortable: true, width: '180px' },
+                  { name: 'Contador', selector: (r: any) => r.admin?.name || 'Sistema', sortable: true, width: '200px' },
+                  { name: 'Acción', selector: (r: any) => r.action, sortable: true, width: '150px' },
+                  { name: 'Detalle', selector: (r: any) => r.details, wrap: true }
+                ]}
+                data={auditLogs}
+                theme="dark"
+                pagination
+                paginationPerPage={10}
+              />
+            )}
+
+            {auditTab === 'TRASH' && (
+              <DataTable 
+                columns={[
+                  { name: 'Cliente', selector: (r: any) => r.name, sortable: true },
+                  { name: 'Documento', selector: (r: any) => r.documentNumber, sortable: true },
+                  { name: 'Contador Asignado', selector: (r: any) => r.admin?.name || '-', sortable: true },
+                  { name: 'Eliminado el', selector: (r: any) => new Date(r.updatedAt).toLocaleString(), sortable: true },
+                  {
+                    name: 'Acciones',
+                    cell: (row: any) => (
+                      <button onClick={() => handleRestoreClient(row.id)} style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                        Restaurar
+                      </button>
+                    )
+                  }
+                ]}
+                data={deletedClients}
+                theme="dark"
+                pagination
+                paginationPerPage={10}
+              />
+            )}
           </div>
         </div>
       )}
