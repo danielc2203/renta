@@ -104,7 +104,7 @@ Certificado de ingresos y retenciones
 Esto lo puedes hacer en el siguiente enlace: {{enlace}}`
     } else if (templateType === 'cobro') {
       rawTemplate = admin?.whatsappTemplateReady || ''
-      defaultTemplate = `Hola {{nombre}}, tu declaración de renta está lista. El valor a pagar por honorarios es {{fee}}.`
+      defaultTemplate = `Hola {{nombre}}, el estado actual de tu declaración de renta es: *{{estado}}*. El valor total de los honorarios es de {{fee}}. Tu saldo pendiente por pagar es de {{deuda}}.`
     } else if (templateType === 'presentada') {
       rawTemplate = admin?.whatsappTemplateFiled || ''
       defaultTemplate = `Hola {{nombre}}, te confirmo que tu declaración de renta ha sido presentada exitosamente en la DIAN. Puedes descargar el formulario en PDF desde nuestro portal: {{enlace}}`
@@ -152,6 +152,8 @@ Esto lo puedes hacer en el siguiente enlace: {{enlace}}`
       .replace(/\{\{enlace\}\}/g, magicLinkUrl)
       .replace(/\{\{dias\}\}/g, expDays.toString())
       .replace(/\{\{fee\}\}/g, client.fee ? `$${client.fee.toLocaleString('es-CO')}` : 'pendiente')
+      .replace(/\{\{estado\}\}/g, client.status)
+      .replace(/\{\{deuda\}\}/g, client.paymentStatus === 'Pagado' ? '$0' : (client.fee ? `$${client.fee.toLocaleString('es-CO')}` : 'pendiente'))
     
     let phoneStr = client.phone.replace(/[^0-9]/g, '')
     if (phoneStr.length === 10) {
