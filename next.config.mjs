@@ -5,6 +5,9 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['archiver']
+  }
 };
 
 export default nextConfig;

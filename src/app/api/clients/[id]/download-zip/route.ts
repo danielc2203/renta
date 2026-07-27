@@ -5,7 +5,8 @@ import { verifyToken } from '@/lib/auth'
 import { cookies } from 'next/headers'
 import path from 'path'
 import fs from 'fs'
-const archiver = require('archiver')
+// @ts-ignore
+import archiver from 'archiver'
 import { Readable } from 'stream'
 
 const UPLOAD_DIR = process.env.NODE_ENV === 'production' 
